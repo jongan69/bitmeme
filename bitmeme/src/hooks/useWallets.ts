@@ -4,6 +4,15 @@ import { getLocalStorage, setLocalStorage } from "@/utils/localStorage";
 import { notifyError, notifySuccess } from "@/utils/notification";
 import { useEffect, useState } from "react";
 import { useStacks } from "@/contexts/StacksWalletProvider";
+import { PublicKey } from "@solana/web3.js";
+
+function requestSolanaAirdrop(publicKey: PublicKey) {
+    try {
+        fetch(`/api/airdrop?address=${publicKey.toBase58()}`);
+    } catch (err) {
+        console.error("Failed to request Solana airdrop:", err);
+    }
+}
 
 export function useWalletOnboarding(onReady?: () => void) {
     const { connectDerivedWallet, wallet: bitcoinWallet } = useBitcoinWallet();
@@ -20,7 +29,10 @@ export function useWalletOnboarding(onReady?: () => void) {
             try {
                 await loadWalletFromLocalStorage();
                 await login();
-                if(publicKey) console.log("Solana wallet loaded: ", publicKey.toBase58());
+                if (publicKey) {
+                    console.log("Solana wallet loaded: ", publicKey.toBase58(), "requesting airdrop");
+                    requestSolanaAirdrop(publicKey);
+                }
             } catch (err) {
                 notifyError("Failed to load Solana wallet.");
                 setError(err as Error);

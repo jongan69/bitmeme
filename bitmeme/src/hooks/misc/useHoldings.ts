@@ -1,18 +1,19 @@
 import { useSolanaWallet } from "@/contexts/SolanaWalletProvider";
 import { HoldingList, NativeBalance } from "@/types/holdings";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getLocalStorage, setLocalStorage } from "@/utils/localStorage";
 import { PublicKey } from "@solana/web3.js";
 import { useCallback, useEffect, useState } from "react";
 
 const CACHE_PREFIX = "holdings_cache_";
 
 async function getCachedHoldings(address: string) {
-    const cached = await AsyncStorage.getItem(CACHE_PREFIX + address);
-    return cached ? JSON.parse(cached) : [];
+    const cached = await getLocalStorage(CACHE_PREFIX + address);
+    return cached ? JSON.parse(cached as string) : [];
 }
 
 async function setCachedHoldings(address: string, holdings: any[]) {
-    await AsyncStorage.setItem(CACHE_PREFIX + address, JSON.stringify(holdings));
+    await setLocalStorage(CACHE_PREFIX + address, JSON.stringify(holdings));
 }
 
 async function getHoldings(address: PublicKey, network: string) {
@@ -76,7 +77,7 @@ export function useHoldings(address: PublicKey) {
         return () => {
             isMounted = false;
         };
-    }, [address, network, fetchHoldings]);
+    }, [address, network]);
 
     return { holdings, loading, error, refetch: fetchHoldings, nativeBalance };
 }

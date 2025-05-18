@@ -36,10 +36,17 @@ export async function GET(request: Request) {
             },
         });
     }
+    try {
     const response = await fetch(baseUrl, {
         method: 'POST',
         body: body,
     });
-    const holdings = await response.json();
-    return Response.json({ holdings });
+        const holdings = await response.json();
+        return Response.json({ holdings });
+    } catch (error) {
+        console.error("Error fetching holdings:", error);
+        return new Response('Error fetching holdings', {
+            status: 500,
+        });
+    }
 }

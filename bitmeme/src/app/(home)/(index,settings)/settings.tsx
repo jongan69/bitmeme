@@ -12,7 +12,7 @@ import * as AC from "@bacons/apple-colors";
 import { Image } from "expo-image";
 import { useNetworkState } from 'expo-network';
 import { router } from "expo-router";
-import React, { ComponentProps } from "react";
+import React, { ComponentProps, useEffect, useState } from "react";
 import { Button, OpaqueColorValue, Switch, Text, View } from "react-native";
 import Animated, {
   interpolate,
@@ -29,16 +29,25 @@ import { notifyError, notifySuccess } from "@/utils/notification";
 import { useClerk } from "@clerk/clerk-expo";
 import * as Network from 'expo-network';
 import useStacksBalance from "@/hooks/misc/useStacksBalance";
+import TextInput from "@/components/ui/TextInput";
+import { useTipSettingsStore } from "@/stores/tipSettingsStore";
+import { useHoldings } from "@/hooks/misc/useHoldings";
+import { PublicKey } from "@solana/web3.js";
+import Icon from "@/components/ui/Icons";
+import TouchableBounce from "@/components/ui/TouchableBounce";
+// import useBitcoinUTXOs from "@/hooks/ares/useBitcoinUTXOs";
+// import { estimateMaxSpendableAmount } from "@/bitcoin";
+// import useTwoWayPegConfiguration from "@/hooks/zpl/useTwoWayPegConfiguration";
+// import { formatValue } from "@/utils/format";
+// import { BTC_DECIMALS } from "@/utils/constant";
 
 
-function Switches() {
-  const [on, setOn] = React.useState(false);
-
+function Switches({ autoTipOn, setAutoTipOn }: { autoTipOn: boolean; setAutoTipOn: (value: boolean) => void }) {
   return (
     <Form.Section title="Settings">
       <Form.Text
         systemImage={"banknote.fill"}
-        hint={<Switch value={on} onValueChange={setOn} />}
+        hint={<Switch value={autoTipOn} onValueChange={setAutoTipOn} />}
       >
         Auto-Tip on like
       </Form.Text>
@@ -49,7 +58,17 @@ function Switches() {
 export default function Page() {
   const { connection } = useSolanaWallet();
   const { solanaAddress, bitcoinAddress, stacksAddress } = useWalletOnboarding();
-  const { data: balance, isLoading, mutate } = useStacksBalance(stacksAddress);
+  const { data: balance, mutate, isValidating: isStacksValidating } = useStacksBalance(stacksAddress);
+  const { nativeBalance, refetch: refetchNativeBalance, loading: isSolLoading } = useHoldings(new PublicKey(solanaAddress!));
+  // const { data: bitcoinUTXOs, mutate: refetchBitcoinUTXOs } = useBitcoinUTXOs(bitcoinAddress ?? null);
+  // const { feeRate } = useTwoWayPegConfiguration();
+
+  // const [spendableUTXOs, setSpendableUTXOs] = useState(() => estimateMaxSpendableAmount(bitcoinUTXOs ?? [], feeRate));
+
+  // useEffect(() => {
+  //   setSpendableUTXOs(estimateMaxSpendableAmount(bitcoinUTXOs ?? [], feeRate));
+  // }, [bitcoinUTXOs, feeRate]);
+  
   const { signOut } = useClerk();
 
   const networkState = useNetworkState();
@@ -59,6 +78,9 @@ export default function Page() {
   // RPC connection state
   const [rpcConnected, setRpcConnected] = React.useState<boolean | null>(null);
   const [rpcChecking, setRpcChecking] = React.useState(false);
+
+  const { tipCurrency, setTipCurrency, tipAmount, setTipAmount, autoTipOn, setAutoTipOn } = useTipSettingsStore();
+  const hasHydrated = useTipSettingsStore.persist?.hasHydrated();
 
   const checkRpcConnection = React.useCallback(async () => {
     if (!connection) {
@@ -114,6 +136,14 @@ export default function Page() {
   });
 
   const [show, setShow] = React.useState(false);
+
+  // Use validation/loading flags for spinner
+  const isRefreshingBalances = isStacksValidating || isSolLoading;
+
+  const handleBalancesRefresh = () => {
+    mutate();
+    refetchNativeBalance();
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -182,7 +212,7 @@ export default function Page() {
       {/* @ts-ignore */}
       <Form.List ref={ref} navigationTitle="Settings">
         <Form.Section>
-          <View style={{ alignItems: "center", gap: 8, padding: 16, flex: 1 }}>
+          <View style={{ alignItems: "center", gap: 8, padding: 16, flex: 1, width: '100%' }}>
             <Image
               source={{ uri: `https://www.gravatar.com/avatar/${bitcoinAddress}?s=250` }}
               style={{
@@ -199,8 +229,30 @@ export default function Page() {
             >
               Welcome to BitMeme!
             </Form.Text>
+            <Form.HStack style={{ justifyContent: 'center', alignItems: 'center', width: '100%' }}>
+              <View style={{ flex: 1 }}>
+                <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
+                  Your STX balance: {balance?.toString()}
+                </Form.Text>
+                <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
+                  Your SOL balance: {nativeBalance.lamports}
+                </Form.Text>
+              </View>
+              <TouchableBounce
+                onPress={handleBalancesRefresh}
+                sensory
+                style={{ marginLeft: 8, padding: 8 }}
+                disabled={isRefreshingBalances}
+              >
+                {isRefreshingBalances ? (
+                  <Icon name="ButtonLoader" size={24} />
+                ) : (
+                  <Icon name="Swap" size={24} />
+                )}
+              </TouchableBounce>
+            </Form.HStack>
             <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
-              Your STX balance: {balance?.toString()}
+              {/* Your spendable Bitcoin balance: {bitcoinUTXOs > 0 ? formatValue(bitcoinUTXOs / 10 ** BTC_DECIMALS, 6) : 0}{" "} */}
             </Form.Text>
             <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
               Your Bitcoin, Solana, and Stacks Wallets are stored locally on your device.{" "}
@@ -227,9 +279,47 @@ export default function Page() {
           </Form.HStack>
         </Form.Section>
 
+        <Switches autoTipOn={autoTipOn} setAutoTipOn={setAutoTipOn} />
+        {autoTipOn && hasHydrated && (
+          <Segments value={tipCurrency} onValueChange={setTipCurrency}>
+            <SegmentsList>
+              <SegmentsTrigger value="STX">STX</SegmentsTrigger>
+              <SegmentsTrigger value="SOL">SOL</SegmentsTrigger>
+              <SegmentsTrigger value="BTC">BTC</SegmentsTrigger>
+            </SegmentsList>
+            <SegmentsContent value="STX">
+              <Form.Text>STX selected</Form.Text>
+              <TextInput
+                keyboardType="decimal-pad"
+                value={tipAmount}
+                onChangeText={setTipAmount}
+                placeholder="Enter micro-payment amount"
+                label="Amount (in micro-payments)"
+              />
+            </SegmentsContent>
+            <SegmentsContent value="SOL">
+              <Form.Text>SOL selected</Form.Text>
+              <TextInput
+                keyboardType="decimal-pad"
+                value={tipAmount}
+                onChangeText={setTipAmount}
+                placeholder="Enter micro-payment amount"
+                label="Amount (in micro-payments)"
+              />
+            </SegmentsContent>
+            <SegmentsContent value="BTC">
+              <Form.Text>BTC selected</Form.Text>
+              <TextInput
+                keyboardType="decimal-pad"
+                value={tipAmount}
+                onChangeText={setTipAmount}
+                placeholder="Enter micro-payment amount"
+                label="Amount (in micro-payments)"
+              />
+            </SegmentsContent>
+          </Segments>
+        )}
 
-
-        <Switches />
         <Form.Section title="Status">
           {(manualNetworkState ?? networkState).isConnected === null ? (
             <ContentUnavailable

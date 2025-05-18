@@ -13,8 +13,15 @@ config.resolver.assetExts = config.resolver.assetExts.filter(
 config.resolver.extraNodeModules = {
   ...(config.resolver.extraNodeModules || {}),
   crypto: require.resolve('expo-crypto'),
-  stream: require.resolve('stream-browserify'),
-  buffer: require.resolve('buffer/'),
+  Buffer: require.resolve('buffer/'),
+  url: require.resolve('react-native-url-polyfill'),
+  // http: require.resolve('stream-http'),
+  // https: require.resolve('https-browserify'),
+  // crypto: require.resolve('react-native-crypto'),
+  // stream: require.resolve('stream-browserify'),
+  // zlib: require.resolve('browserify-zlib'),
+  // util: require.resolve('util/'),
+  // assert: require.resolve('assert'),
 };
 
 config.transformer.babelTransformerPath = require.resolve(

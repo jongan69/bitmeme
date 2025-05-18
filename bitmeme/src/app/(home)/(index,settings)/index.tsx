@@ -2,7 +2,7 @@ import * as Form from "@/components/ui/Form";
 import Stack from "@/components/ui/Stack";
 import * as AC from "@bacons/apple-colors";
 import React from "react";
-import { Image, Text, View, TouchableOpacity, TextInput, ScrollView } from "react-native";
+import { Image, Text, View, TouchableOpacity, TextInput, ScrollView, useColorScheme } from "react-native";
 import Animated, {
   interpolate,
   useAnimatedRef,
@@ -11,6 +11,13 @@ import Animated, {
 } from "react-native-reanimated";
 import { useTable, useAddLikeCallback, useRemoveLikeCallback, useAddCommentCallback } from "@/stores/Memestore";
 import { useUserIdAndNickname } from "@/hooks/useNickname";
+import { useStacks } from "@/contexts/StacksWalletProvider";
+import { useBitcoinWallet } from "@/contexts/BitcoinWalletProvider";
+import { useSolanaPayment } from "@/hooks/misc/usePayment";
+import { useTipSettingsStore } from "@/stores/tipSettingsStore";
+import { useWalletOnboarding } from "@/hooks/useWallets";
+import { notifySuccess, notifyError, notifyInfo } from "@/utils/notification";
+import { PublicKey } from "@solana/web3.js";
 
 export default function Page() {
   const ref = useAnimatedRef();
@@ -20,6 +27,10 @@ export default function Page() {
       { translateY: interpolate(scroll.value, [-120, -70], [50, 0], "clamp") },
     ],
   }));
+  const { tipCurrency, tipAmount, autoTipOn } = useTipSettingsStore();
+  const { transfer } = useSolanaPayment();
+  const { sendBitcoin } = useBitcoinWallet();
+  const { tipUser } = useStacks();
 
   // Use table-level hooks
   const memes = useTable("memes", "memeStore");
@@ -30,6 +41,9 @@ export default function Page() {
     caption: string;
     postUrl: string;
     createdAt: string;
+    solanaAddress?: string;
+    bitcoinAddress?: string;
+    stacksAddress?: string;
   }>;
   const [expandedMemeId, setExpandedMemeId] = React.useState<string | null>(null);
   const [commentInputs, setCommentInputs] = React.useState<{ [memeId: string]: string }>({});
@@ -38,6 +52,8 @@ export default function Page() {
   const removeLike = useRemoveLikeCallback();
   const addComment = useAddCommentCallback();
   const [userId] = useUserIdAndNickname();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
 
   return (
     // @ts-ignore
@@ -73,151 +89,168 @@ export default function Page() {
         />
       )}
 
-      <Form.Section
-        title="Recent Memes"
-        footer={
-          <Text>
-            {memeList.length > 0 ? `${memeList.length} memes` : "No memes yet"}
-          </Text>
-        }
-      >
-        {/* Posted Memes Section */}
-        {memeList.length > 0 && (
-          <Form.Section>
-            <View style={{ backgroundColor: "#f6f6f6", paddingVertical: 8 }}>
-              {memeList.map((meme) => {
-                const memeLikes = (Object.values(likes ?? {}) as Array<{ memeId: string; userId: string }>).filter((like) => like.memeId === meme.id);
-                const memeComments = (Object.values(comments ?? {}) as Array<{ memeId: string; id?: string; text?: string }>).filter((comment) => comment.memeId === meme.id);
-                const hasLiked = !!userId && memeLikes.some(like => like.userId === userId);
-                const commentText = commentInputs[meme.id] || "";
-                return (
-                  <View
-                    key={meme.id}
+      {/* Posted Memes Section */}
+      {memeList.length > 0 && (
+        <View style={{ backgroundColor: isDark ? "#18181b" : "#f6f6f6", gap: 12, alignSelf: "center", justifyContent: "center", width: "100%" }}>
+          {memeList.map((meme) => {
+            const memeLikes = (Object.values(likes ?? {}) as Array<{ memeId: string; userId: string }>).filter((like) => like.memeId === meme.id);
+            const memeComments = (Object.values(comments ?? {}) as Array<{ memeId: string; id?: string; text?: string }>).filter((comment) => comment.memeId === meme.id);
+            const hasLiked = !!userId && memeLikes.some(like => like.userId === userId);
+            const commentText = commentInputs[meme.id] || "";
+            // --- Tip logic ---
+            const handleLikeAndTip = async () => {
+              if (hasLiked) {
+                removeLike(meme.id);
+                return;
+              }
+              addLike(meme.id);
+              if (!autoTipOn) return;
+              try {
+                if (tipCurrency === "STX" && meme.stacksAddress) {
+                  await tipUser(meme.stacksAddress, BigInt(tipAmount));
+                  notifySuccess("Tipped with STX!");
+                } else if (tipCurrency === "SOL" && meme.solanaAddress) {
+                  await transfer(Number(tipAmount), "SOL", new PublicKey(meme.solanaAddress));
+                  notifySuccess("Tipped with SOL!");
+                } else if (tipCurrency === "BTC" && meme.bitcoinAddress) {
+                  await sendBitcoin(meme.bitcoinAddress, Number(tipAmount));
+                  notifySuccess("Tipped with BTC!");
+                } else {
+                  notifyInfo("No address for selected tip currency.");
+                  console.log("No address for selected tip currency: ", tipCurrency, meme.stacksAddress, meme.solanaAddress, meme.bitcoinAddress);
+                }
+              } catch (e: any) {
+                notifyError("Tip failed: " + (e && (e.message || typeof e === 'string' ? e : JSON.stringify(e))));
+              }
+            };
+
+            return (
+              <View
+                key={meme.id}
+                style={{
+                  marginBottom: 24,
+                  backgroundColor: isDark ? "#18181b" : "#fff",
+                  borderRadius: 16,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 8,
+                  elevation: 3,
+                  padding: 16,
+                }}
+              >
+                <Image
+                  source={{ uri: meme.postUrl }}
+                  style={{
+                    width: "100%",
+                    height: 220,
+                    borderRadius: 12,
+                    marginBottom: 12,
+                    backgroundColor: "#f0f0f0",
+                  }}
+                  resizeMode="contain"
+                />
+                <Text style={{ fontWeight: "bold", fontSize: 18, marginBottom: 4, color: isDark ? "#fff" : "#000" }}>
+                  {meme.caption}
+                </Text>
+                <Text style={{ color: "#aaa", fontSize: 12, marginBottom: 8 }}>
+                  {meme.createdAt ? new Date(meme.createdAt).toLocaleString() : ""}
+                </Text>
+                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                  <TouchableOpacity
+                    onPress={handleLikeAndTip}
                     style={{
-                      marginBottom: 24,
-                      backgroundColor: "#fff",
-                      borderRadius: 16,
-                      shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.08,
-                      shadowRadius: 8,
-                      elevation: 3,
-                      padding: 16,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginRight: 16,
+                      paddingVertical: 4,
+                      paddingHorizontal: 8,
+                      borderRadius: 8,
+                      backgroundColor: hasLiked ? "#ffeaea" : "#f5f5f5",
                     }}
                   >
-                    <Image
-                      source={{ uri: meme.postUrl }}
+                    <Text style={{ color: hasLiked ? "#e74c3c" : "#888", fontWeight: "bold", marginRight: 4 }}>
+                      ❤️
+                    </Text>
+                    <Text style={{ color: hasLiked ? "#e74c3c" : "#888" }}>
+                      {memeLikes.length}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setExpandedMemeId(expandedMemeId === meme.id ? null : meme.id)}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      paddingVertical: 4,
+                      paddingHorizontal: 8,
+                      borderRadius: 8,
+                      backgroundColor: "#f5f5f5",
+                    }}
+                  >
+                    <Text style={{ color: "#2980b9", fontWeight: "bold", marginRight: 4 }}>
+                      💬
+                    </Text>
+                    <Text style={{ color: "#2980b9" }}>
+                      {memeComments.length}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                {expandedMemeId === meme.id && (
+                  <View style={{
+                    marginTop: 8,
+                    backgroundColor: "#f9f9f9",
+                    borderRadius: 10,
+                    padding: 10,
+                  }}>
+                    <TextInput
+                      value={commentText}
+                      onChangeText={text => setCommentInputs(inputs => ({ ...inputs, [meme.id]: text }))}
+                      placeholder="Add a comment..."
                       style={{
-                        width: "100%",
-                        height: 220,
-                        borderRadius: 12,
-                        marginBottom: 12,
-                        backgroundColor: "#f0f0f0",
+                        borderWidth: 1,
+                        borderColor: "#eee",
+                        borderRadius: 8,
+                        padding: 8,
+                        marginBottom: 8,
+                        fontSize: 14,
+                        backgroundColor: "#fff"
                       }}
-                      resizeMode="contain"
                     />
-                    <Text style={{ fontWeight: "bold", fontSize: 18, marginBottom: 4 }}>
-                      {meme.caption}
-                    </Text>
-                    <Text style={{ color: "#aaa", fontSize: 12, marginBottom: 8 }}>
-                      {meme.createdAt ? new Date(meme.createdAt).toLocaleString() : ""}
-                    </Text>
-                    <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-                      <TouchableOpacity
-                        onPress={() => hasLiked ? removeLike(meme.id) : addLike(meme.id)}
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          marginRight: 16,
-                          paddingVertical: 4,
-                          paddingHorizontal: 8,
-                          borderRadius: 8,
-                          backgroundColor: hasLiked ? "#ffeaea" : "#f5f5f5",
-                        }}
-                      >
-                        <Text style={{ color: hasLiked ? "#e74c3c" : "#888", fontWeight: "bold", marginRight: 4 }}>
-                          ❤️
-                        </Text>
-                        <Text style={{ color: hasLiked ? "#e74c3c" : "#888" }}>
-                          {memeLikes.length}
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => setExpandedMemeId(expandedMemeId === meme.id ? null : meme.id)}
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          paddingVertical: 4,
-                          paddingHorizontal: 8,
-                          borderRadius: 8,
-                          backgroundColor: "#f5f5f5",
-                        }}
-                      >
-                        <Text style={{ color: "#2980b9", fontWeight: "bold", marginRight: 4 }}>
-                          💬
-                        </Text>
-                        <Text style={{ color: "#2980b9" }}>
-                          {memeComments.length}
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                    {expandedMemeId === meme.id && (
-                      <View style={{
-                        marginTop: 8,
-                        backgroundColor: "#f9f9f9",
-                        borderRadius: 10,
-                        padding: 10,
-                      }}>
-                        <TextInput
-                          value={commentText}
-                          onChangeText={text => setCommentInputs(inputs => ({ ...inputs, [meme.id]: text }))}
-                          placeholder="Add a comment..."
-                          style={{
-                            borderWidth: 1,
-                            borderColor: "#eee",
-                            borderRadius: 8,
-                            padding: 8,
-                            marginBottom: 8,
-                            fontSize: 14,
-                            backgroundColor: "#fff"
-                          }}
-                        />
-                        <TouchableOpacity
-                          onPress={() => {
-                            if (commentText.trim()) {
-                              addComment(meme.id, commentText.trim());
-                              setCommentInputs(inputs => ({ ...inputs, [meme.id]: "" }));
-                            }
-                          }}
-                          style={{
-                            backgroundColor: "#2980b9",
-                            borderRadius: 8,
-                            paddingVertical: 6,
-                            paddingHorizontal: 16,
-                            alignSelf: "flex-end",
-                            marginBottom: 8
-                          }}
-                        >
-                          <Text style={{ color: "#fff", fontSize: 14, fontWeight: "bold" }}>Post</Text>
-                        </TouchableOpacity>
-                        {memeComments.length > 0 && (
-                          <View style={{ marginTop: 4 }}>
-                            {memeComments.map((comment, idx) => (
-                              <Text key={comment.id || idx} style={{ fontSize: 13, color: '#555', marginBottom: 2 }}>
-                                • {comment.text}
-                              </Text>
-                            ))}
-                          </View>
-                        )}
+                    <TouchableOpacity
+                      onPress={() => {
+                        if (commentText.trim()) {
+                          addComment(meme.id, commentText.trim());
+                          setCommentInputs(inputs => ({ ...inputs, [meme.id]: "" }));
+                        }
+                      }}
+                      style={{
+                        backgroundColor: "#2980b9",
+                        borderRadius: 8,
+                        paddingVertical: 6,
+                        paddingHorizontal: 16,
+                        alignSelf: "flex-end",
+                        marginBottom: 8
+                      }}
+                    >
+                      <Text style={{ color: "#fff", fontSize: 14, fontWeight: "bold" }}>Post</Text>
+                    </TouchableOpacity>
+                    {memeComments.length > 0 && (
+                      <View style={{ marginTop: 4 }}>
+                        {memeComments.map((comment, idx) => (
+                          <Text key={comment.id || idx} style={{ fontSize: 13, color: '#555', marginBottom: 2 }}>
+                            • {comment.text}
+                          </Text>
+                        ))}
                       </View>
                     )}
                   </View>
-                );
-              })}
-            </View>
-          </Form.Section>
-        )}
-      </Form.Section>
+                )}
+              </View>
+            );
+          })}
+        </View>
+      )}
+
     </Form.List>
   );
 }

@@ -23,7 +23,7 @@ const fetchStacksBalance = async (address: string | null): Promise<BigNumber> =>
 
 const useStacksBalance = (address: string | null) => {
   const shouldFetch = useMemo(() => !!address, [address]);
-  const { data, isLoading, mutate } = useSWR<BigNumber>(
+  const { data, isLoading, mutate, isValidating } = useSWR<BigNumber>(
     shouldFetch ? ["stx-balance", address] : null,
     () => fetchStacksBalance(address),
     {
@@ -36,6 +36,7 @@ const useStacksBalance = (address: string | null) => {
     data: data ?? new BigNumber(0),
     isLoading,
     mutate,
+    isValidating,
   };
 };
 

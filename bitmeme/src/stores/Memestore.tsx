@@ -68,6 +68,7 @@ export const useAddMemeCallback = () => {
       postUrl: string;
       solanaAddress: string;
       bitcoinAddress: string;
+      stacksAddress: string;
     }) => {
       if (!store) throw new Error("Store is not initialized");
       const id = randomUUID();

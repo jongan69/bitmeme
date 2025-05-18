@@ -5,12 +5,10 @@ import { useMintNftWithImageUrl } from "@/hooks/useMintNft";
 import { useWalletOnboarding } from "@/hooks/useWallets";
 import { useAddMemeCallback } from "@/stores/Memestore";
 import { notifyError, notifySuccess } from "@/utils/notification";
-import { useUser } from "@clerk/clerk-expo";
 import Constants from "expo-constants";
 import { fetch } from "expo/fetch";
 import React, { useState } from "react";
-import { ActivityIndicator, Button, Image, KeyboardAvoidingView, Platform, Text, TextInput, View } from "react-native";
-
+import { ActivityIndicator, Button, Image, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from "react-native";
 
 const API_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -46,8 +44,7 @@ interface Meme {
 }
 
 export default function MemeGenerator() {
-  const { user } = useUser();
-  const { solanaAddress, bitcoinAddress } = useWalletOnboarding();
+  const { solanaAddress, bitcoinAddress, stacksAddress } = useWalletOnboarding();
   const [prompt, setPrompt] = useState("");
   const [memes, setMemes] = useState<Meme[]>([]);
   const [loading, setLoading] = useState(false);
@@ -135,6 +132,7 @@ export default function MemeGenerator() {
         postUrl: url,
         solanaAddress: solanaAddress || "",
         bitcoinAddress: bitcoinAddress || "",
+        stacksAddress: stacksAddress || "",
       });
       notifySuccess("Meme posted!\nCaption: " + caption);
       setSelectedMeme(null);
@@ -147,15 +145,15 @@ export default function MemeGenerator() {
   };
 
   return (
-    <>
-      <Stack.Screen options={{ headerTitle: "BitMeme Generator" }} />
-      <Form.List navigationTitle="BitMeme Generator">
+    <ScrollView>
+      <Form.List navigationTitle="BitMeme Generator" listStyle="auto">
+        <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 12, marginTop: 12, textAlign: "center", color: "white" }}>BitMeme Generator</Text>
         <Form.Section title="Describe your meme idea">
           <TextInput
             placeholder="e.g. when your code finally compiles"
             value={prompt}
             onChangeText={setPrompt}
-            style={{ marginBottom: 12, padding: 10, borderWidth: 1, borderRadius: 8 }}
+            style={{ marginBottom: 12, padding: 10, borderWidth: 1, borderRadius: 8, color: "white" }}
           />
           <Button
             title={loading ? "Generating..." : "Generate Meme"}
@@ -163,68 +161,70 @@ export default function MemeGenerator() {
             disabled={!prompt || loading}
           />
         </Form.Section>
-        {loading && (
-          <View style={{ alignItems: "center", marginVertical: 24 }}>
-            <ActivityIndicator size="large" color="#888" />
-            <Text style={{ marginTop: 12 }}>Generating memes...</Text>
-          </View>
-        )}
-        {!loading && memes.length > 0 && !selectedMeme && (
-          <Form.Section title="Pick a Meme">
-            <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 8 }}>
-              {memes.filter((meme) => meme.template && meme.top_text && meme.bottom_text).map((meme, idx) => (
-                <TouchableBounce key={idx} onPress={() => setSelectedMeme(meme)}>
-                  <Image
-                    source={{
-                      uri: `https://api.memegen.link/images/${meme.template}/${encodeURIComponent((meme.top_text || "").replace(/ /g, "_"))}/${encodeURIComponent((meme.bottom_text || "").replace(/ /g, "_"))}.png`
-                    }}
-                    style={{ width: 120, height: 120, borderRadius: 8, marginBottom: 8, borderWidth: 2, borderColor: '#ccc' }}
-                    resizeMode="contain"
-                  />
-                </TouchableBounce>
-              ))}
-            </View>
-          </Form.Section>
-        )}
-        {!loading && selectedMeme && (
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={{ flex: 1 }}
-            keyboardVerticalOffset={80}
-          >
-            <Form.Section title="Selected Meme">
+      </Form.List>
+
+      {loading && (
+        <View style={{ alignItems: "center", marginVertical: 8 }}>
+          <ActivityIndicator size="large" color="#888" />
+          <Text style={{ marginTop: 12 }}>Generating memes...</Text>
+        </View>
+      )}
+      {!loading && memes.length > 0 && !selectedMeme && (
+
+        <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 8 }}>
+          {memes.filter((meme) => meme.template && meme.top_text && meme.bottom_text).map((meme, idx) => (
+            <TouchableBounce key={idx} onPress={() => setSelectedMeme(meme)}>
               <Image
                 source={{
-                  uri: `https://api.memegen.link/images/${selectedMeme.template}/${encodeURIComponent((selectedMeme.top_text || "").replace(/ /g, "_"))}/${encodeURIComponent((selectedMeme.bottom_text || "").replace(/ /g, "_"))}.png`
+                  uri: `https://api.memegen.link/images/${meme.template}/${encodeURIComponent((meme.top_text || "").replace(/ /g, "_"))}/${encodeURIComponent((meme.bottom_text || "").replace(/ /g, "_"))}.png`
                 }}
-                style={{ width: "100%", height: 350, borderRadius: 8, marginBottom: 12 }}
+                style={{ width: 120, height: 120, borderRadius: 8, marginBottom: 8, borderWidth: 2, borderColor: '#ccc' }}
                 resizeMode="contain"
               />
-              <TextInput
-                placeholder="Add a caption for your meme post..."
-                value={caption}
-                onChangeText={setCaption}
-                style={{ marginBottom: 12, padding: 10, borderWidth: 1, borderRadius: 8 }}
-              />
-              <Button
-                title={posting ? "Posting..." : "Post Meme"}
-                onPress={() =>
-                  handlePost(
-                    `https://api.memegen.link/images/${selectedMeme.template}/${encodeURIComponent((selectedMeme.top_text || "").replace(/ /g, "_"))}/${encodeURIComponent((selectedMeme.bottom_text || "").replace(/ /g, "_"))}.png`,
-                    caption
-                  )
-                }
-                disabled={!caption || posting}
-              />
-              <Button
-                title="Back to Results"
-                onPress={() => setSelectedMeme(null)}
-                color="#888"
-              />
-            </Form.Section>
-          </KeyboardAvoidingView>
-        )}
-      </Form.List>
-    </>
+            </TouchableBounce>
+          ))}
+        </View>
+
+      )}
+      {!loading && selectedMeme && (
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+          keyboardVerticalOffset={80}
+        >
+
+          <Image
+            source={{
+              uri: `https://api.memegen.link/images/${selectedMeme.template}/${encodeURIComponent((selectedMeme.top_text || "").replace(/ /g, "_"))}/${encodeURIComponent((selectedMeme.bottom_text || "").replace(/ /g, "_"))}.png`
+            }}
+            style={{ width: "100%", height: 350, borderRadius: 8, marginBottom: 12 }}
+            resizeMode="contain"
+          />
+          <TextInput
+            placeholder="Add a caption for your meme post..."
+            value={caption}
+            onChangeText={setCaption}
+            style={{ marginBottom: 12, padding: 10, borderWidth: 1, borderRadius: 8 }}
+          />
+          <Button
+            title={posting ? "Posting..." : "Post Meme"}
+            onPress={() =>
+              handlePost(
+                `https://api.memegen.link/images/${selectedMeme.template}/${encodeURIComponent((selectedMeme.top_text || "").replace(/ /g, "_"))}/${encodeURIComponent((selectedMeme.bottom_text || "").replace(/ /g, "_"))}.png`,
+                caption
+              )
+            }
+            disabled={!caption || posting}
+          />
+          <Button
+            title="Back to Results"
+            onPress={() => setSelectedMeme(null)}
+            color="#888"
+          />
+
+        </KeyboardAvoidingView>
+      )}
+
+    </ScrollView>
   );
 } 

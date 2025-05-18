@@ -30,14 +30,32 @@ const SegmentsContext = createContext<SegmentsContextValue | undefined>(
 
 interface SegmentsProps {
   /** The initial value for the controlled Segments */
-  defaultValue: string;
-
+  defaultValue?: string;
+  /** The controlled value for the Segments (optional) */
+  value?: string;
+  /** Callback when the value changes (optional, for controlled usage) */
+  onValueChange?: (value: string) => void;
   /** The children of the Segments component (SegmentsList, SegmentsContent, etc.) */
   children: ReactNode;
 }
 
-export function Segments({ defaultValue, children }: SegmentsProps) {
-  const [value, setValue] = useState(defaultValue);
+export function Segments({ defaultValue, value: controlledValue, onValueChange, children }: SegmentsProps) {
+  const [uncontrolledValue, setUncontrolledValue] = useState(defaultValue ?? "");
+  const isControlled = controlledValue !== undefined && onValueChange !== undefined;
+  const value = isControlled ? controlledValue : uncontrolledValue;
+
+  // Always provide a setValue that matches React.Dispatch<React.SetStateAction<string>>
+  const setValue: React.Dispatch<React.SetStateAction<string>> = isControlled
+    ? (v) => {
+        if (typeof v === "function") {
+          // We don't have access to previous value in controlled mode, so just call with current value
+          const next = (v as (prev: string) => string)(value);
+          onValueChange(next);
+        } else {
+          onValueChange(v);
+        }
+      }
+    : setUncontrolledValue;
 
   return (
     <SegmentsContext value={{ value, setValue }}>{children}</SegmentsContext>

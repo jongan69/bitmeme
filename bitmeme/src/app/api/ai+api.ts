@@ -23,9 +23,9 @@ export async function POST(req: Request) {
     // Fetch meme templates and randomly select a subset
     const templatesRes = await fetch("https://api.memegen.link/templates/");
     const templates = await templatesRes.json();
-    // Randomly pick 20 templates
+    // Randomly pick 40 templates
     const shuffled = templates.sort(() => 0.5 - Math.random());
-    const pickedTemplates = shuffled.slice(0, 20);
+    const pickedTemplates = shuffled.slice(0, 40);
     const templatePairs = pickedTemplates.map((t: any) => `${t.id} (${t.name})`);
     const templateList = templatePairs.join(", ");
     
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     const writer = stream.writable.getWriter();
 
     // Debug: log system prompt
-    const systemPrompt = `You are a meme generator assistant. Here is a list of valid meme templates: [${templateList}]. Given a meme idea, suggest up to 10 possible memes using these templates (by id), and provide the top and bottom text for each. Respond in JSON: { "memes": [ { "template": "...", "top_text": "...", "bottom_text": "..." }, ... ] }`;
+    const systemPrompt = `You are a meme generator assistant. Here is a list of valid meme templates: [${templateList}]. Given a meme idea, suggest up to 12 possible memes using these templates (by id), and provide the top and bottom text for each. Respond in JSON: { "memes": [ { "template": "...", "top_text": "...", "bottom_text": "..." }, ... ] }`;
     console.log("System prompt for AI:\n", systemPrompt);
 
     // Chat stream

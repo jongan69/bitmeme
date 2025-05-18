@@ -102,13 +102,13 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const storedWallet = await getLocalStorage<Wallet>("stx-wallet");
             if (!storedWallet) throw new Error("No wallet found in local storage");
-            console.log("storedWallet:", storedWallet);
+            // console.log("storedWallet:", storedWallet);
             setWallet(storedWallet);
             const stxAddress = getAddressFromPrivateKey(
                 storedWallet.accounts[0].stxPrivateKey,
                 network
             );
-            console.log("stxAddress:", stxAddress);
+            // console.log("stxAddress:", stxAddress);
             setAddress(stxAddress);
             setLog("Stacks wallet loaded from local storage!");
         } catch (err: any) {
