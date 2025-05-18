@@ -9,6 +9,9 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "tunnel": "npx expo start --tunnel",
+    "export:web": "npx expo export -p web",
+    "deploy:web": "eas deploy --prod",
+    "update:mobile": "eas update --message 'Update mobile app' --channel production",
     "knip": "knip"
   },
   "dependencies": {
