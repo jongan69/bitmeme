@@ -20,7 +20,7 @@ export function useWalletOnboarding(onReady?: () => void) {
             try {
                 await loadWalletFromLocalStorage();
                 await login();
-                console.log("Solana wallet loaded: ", publicKey?.toBase58());
+                if(publicKey) console.log("Solana wallet loaded: ", publicKey.toBase58());
             } catch (err) {
                 notifyError("Failed to load Solana wallet.");
                 setError(err as Error);
@@ -47,6 +47,7 @@ export function useWalletOnboarding(onReady?: () => void) {
     useEffect(() => {
         const notifyIfNeeded = async () => {
             if (bitcoinWallet?.p2tr) {
+                console.log("Bitcoin wallet loaded: ", bitcoinWallet.p2tr);
                 const notifiedKey = `wallet-notified-${bitcoinWallet.p2tr}`;
                 const alreadyNotified = await getLocalStorage<boolean>(notifiedKey);
                 if (!alreadyNotified) {
@@ -61,9 +62,7 @@ export function useWalletOnboarding(onReady?: () => void) {
 
     // Log when stacksAddress is set
     useEffect(() => {
-        if (stacksAddress) {
-            console.log("Stacks wallet loaded: ", stacksAddress);
-        }
+        if (stacksAddress) console.log("Stacks wallet loaded: ", stacksAddress);
     }, [stacksAddress]);
 
     return {

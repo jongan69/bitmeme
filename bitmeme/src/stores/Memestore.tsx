@@ -91,7 +91,7 @@ export const useMemeIds = () =>
 export const useMemeCell = (memeId: string, cellId: keyof typeof MEME_TABLE_SCHEMA["memes"]) =>
   useCell("memes", memeId, cellId, STORE_ID);
 
-console.log("Memestore id", STORE_ID);
+// console.log("Memestore id", STORE_ID);
 // MemeStore component
 export default function MemeStore() {
   const [userId] = useUserIdAndNickname();

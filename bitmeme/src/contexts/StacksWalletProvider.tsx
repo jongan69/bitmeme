@@ -3,8 +3,8 @@ import {
     getAddressFromPrivateKey,
     makeSTXTokenTransfer,
     makeContractCall,
-    bufferCVFromString,
     broadcastTransaction,
+    stringAsciiCV,
 } from "@stacks/transactions";
 import { generateMnemonic, mnemonicToSeed } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english';
@@ -62,12 +62,11 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
             setLog("Wallet generated successfully!");
         } catch (err: any) {
             console.error("Error in generateStxWallet:", err);
-            setLog(`Wallet generation error: ${err.message || err}`);
+            setLog(`Stacks wallet generation error: ${err.message || err}`);
         }
     };
 
     const loadWalletFromLocalStorage = async () => {
-        console.log("Loading Stacks wallet from local storage");
         try {
             const storedWallet = await getLocalStorage<Wallet>("stx-wallet");
             if (!storedWallet) throw new Error("No wallet found in local storage");
@@ -77,9 +76,9 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
                 network
             );
             setAddress(stxAddress);
-            setLog("Wallet loaded from local storage!");
+            setLog("Stacks wallet loaded from local storage!");
         } catch (err: any) {
-            setLog(`Load wallet error: ${err.message || err}`);
+            setLog(`Load Stacks wallet error: ${err.message || err}`);
         }
     };
 
@@ -104,7 +103,7 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
     // Tipping function (no post condition)
     const tipUser = async (recipient: string, amount: bigint, memo = "") => {
         try {
-            if (!wallet) throw new Error("Wallet not initialized");
+            if (!wallet) throw new Error("Stacks wallet not initialized");
             const txOptions = {
                 recipient,
                 amount,
@@ -116,28 +115,35 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
             const response = await broadcastTransaction({ transaction, network });
             setLog(`Tipped ${amount} microSTX to ${recipient}. TxID: ${response.txid}`);
         } catch (err: any) {
-            setLog(`Tip error: ${err.message || err}`);
+            setLog(`Tip Stacks error: ${err.message || err}`);
         }
     };
 
     // NFT minting function (update contract details as needed)
     const mintNFT = async (metadataUri?: string) => {
+        console.log("mintNFT called", { metadataUri });
         try {
             if (!wallet) throw new Error("Wallet not initialized");
             const uri = metadataUri || "https://ipfs.io/ipfs/<metadata-hash>";
+            console.log("Using URI for NFT:", uri);
+            console.log("Contract address:", process.env.EXPO_PUBLIC_STACKS_TESTNET_CONTRACT);
             const txOptions = {
                 contractAddress: process.env.EXPO_PUBLIC_STACKS_TESTNET_CONTRACT!, // your contract address
                 contractName: "bitmeme-mint", // your contract name
                 functionName: "claim",
-                functionArgs: [bufferCVFromString(uri)],
+                functionArgs: [stringAsciiCV(uri)],
                 senderKey: wallet.accounts[0].stxPrivateKey,
                 network: STACKS_TESTNET, // use STACKS_MAINNET for mainnet
                 validateWithAbi: true,
             };
+            console.log("mintNFT txOptions", txOptions);
             const transaction = await makeContractCall(txOptions);
+            console.log("mintNFT transaction", transaction);
             const response = await broadcastTransaction({ transaction, network: STACKS_TESTNET });
+            console.log("mintNFT broadcast response", response);
             setLog(`NFT mint transaction sent! TxID: ${response.txid}`);
         } catch (err: any) {
+            console.error("NFT mint error:", err);
             setLog(`NFT mint error: ${err.message || err}`);
         }
     };
