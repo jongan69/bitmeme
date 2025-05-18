@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import { ActivityIndicator, Button, Image, KeyboardAvoidingView, Platform, Text, TextInput, View } from "react-native";
 
 
-const API_URL = process.env.EXPO_BASE_URL;
+const API_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
 const generateAPIUrl = (relativePath: string) => {
   console.log("Constants", Constants.experienceUrl);
