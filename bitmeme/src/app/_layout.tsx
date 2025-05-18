@@ -1,6 +1,15 @@
-import ThemeProvider from "@/components/ui/ThemeProvider";
 import "../../polyfills";
 
+import * as pbkdf2 from "pbkdf2";
+// import { Crypto } from "@peculiar/webcrypto";
+
+// Object.assign(global.crypto, new Crypto());
+
+console.log("PBKDF2:", pbkdf2.pbkdf2);
+console.log("PBKDF2Sync:", pbkdf2.pbkdf2Sync);
+console.log("Crypto object:", global.crypto);
+
+import ThemeProvider from "@/components/ui/ThemeProvider";
 import { AsyncFont } from "@/components/data/async-font";
 import { tokenCache } from "@/stores/local/cache";
 import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";

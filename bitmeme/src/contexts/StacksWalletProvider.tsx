@@ -1,5 +1,4 @@
-// app/providers/StacksProvider.tsx
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState } from "react";
 import {
     getAddressFromPrivateKey,
     makeSTXTokenTransfer,
@@ -7,8 +6,11 @@ import {
     bufferCVFromString,
     broadcastTransaction,
 } from "@stacks/transactions";
-import { Wallet, generateSecretKey, generateWallet } from "@stacks/wallet-sdk";
-import { STACKS_MAINNET, STACKS_TESTNET } from "@stacks/network";
+import { generateMnemonic, mnemonicToSeed } from '@scure/bip39';
+import { wordlist } from '@scure/bip39/wordlists/english';
+import { Wallet } from "@stacks/wallet-sdk";
+import { HDKey } from "@scure/bip32";
+import { STACKS_TESTNET } from "@stacks/network";
 import { requestStxAirdrop } from "@/utils/requestStxAirdrop";
 import { setLocalStorage, getLocalStorage } from "@/utils/localStorage";
 
@@ -34,27 +36,28 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
     const [log, setLog] = useState("");
     //   const network = STACKS_MAINNET; // Change to STACKS_TESTNET if needed
     const network = STACKS_TESTNET;
+
     const generateStxWallet = async () => {
-        console.log("Generating Stacks wallet");
+        console.log("Generating Stacks wallet (BIP39 mnemonic)");
         try {
-            const secretKey = generateSecretKey();
-            console.log("Generated secretKey:", secretKey);
-            setMnemonic(secretKey);
-            const wallet = await generateWallet({
-                secretKey,
-                password: "",
-            });
-            console.log("Stacks wallet object:", wallet);
-            const stxPrivateKey = wallet.accounts[0]?.stxPrivateKey;
-            console.log("stxPrivateKey:", stxPrivateKey);
-            const stxAddress = getAddressFromPrivateKey(
-                stxPrivateKey,
-                network
-            );
-            console.log("Derived stxAddress:", stxAddress);
+            const mnemonic = generateMnemonic(wordlist); // ✅
+            const seed = await mnemonicToSeed(mnemonic);
+            const rootNode = HDKey.fromMasterSeed(seed);
+            const derivationPath = "m/44'/5757'/0'/0/0";
+            const childNode = rootNode.derive(derivationPath);
+            const stxPrivateKey = Buffer.from(childNode.privateKey!).toString('hex');
+            const stxAddress = getAddressFromPrivateKey(stxPrivateKey, network);
+
             await requestStxAirdrop(stxAddress);
-            setWallet(wallet);
+
+            const wallet = {
+                accounts: [{ stxPrivateKey }],
+            };
+
+            setMnemonic(mnemonic);
+            setWallet(wallet as any);
             setLocalStorage("stx-wallet", wallet);
+            setLocalStorage("stx-mnemonic", mnemonic);
             setAddress(stxAddress);
             setLog("Wallet generated successfully!");
         } catch (err: any) {
