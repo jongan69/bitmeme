@@ -29,7 +29,9 @@
     "plugins": [
       [
         "expo-router",
-        {}
+        {
+          "origin": "https://bitmeme.expo.app"
+        }
       ],
       [
         "expo-splash-screen",
@@ -49,7 +51,16 @@
       "reactCompiler": true
     },
     "extra": {
-      "eas": {}
+      "eas": {
+        "projectId": "a2ddc42a-a392-408a-91a1-ef80779c475d"
+      },
+      "router": {}
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/a2ddc42a-a392-408a-91a1-ef80779c475d"
     }
   }
 }

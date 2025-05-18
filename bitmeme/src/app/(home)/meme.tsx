@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import { ActivityIndicator, Button, Image, KeyboardAvoidingView, Platform, Text, TextInput, View } from "react-native";
 
 
-const API_URL = "https://api.routes.expo.app";
+const API_URL = process.env.EXPO_BASE_URL;
 
 const generateAPIUrl = (relativePath: string) => {
   console.log("Constants", Constants.experienceUrl);
@@ -18,10 +18,14 @@ const generateAPIUrl = (relativePath: string) => {
   const origin =
     Constants?.experienceUrl?.replace("exp://", "http://") || API_URL;
 
+  if (!origin) {
+    throw new Error("No API base URL found");
+  }
+
   const path = relativePath.startsWith("/") ? relativePath : `/${relativePath}`;
 
   if (process.env.NODE_ENV === "development") {
-    return origin?.concat(path);
+    return origin.concat(path);
   }
 
   if (!API_URL) {
