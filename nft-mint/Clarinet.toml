@@ -1,0 +1,29 @@
+[project]
+name = 'nft-mint'
+description = ''
+authors = []
+telemetry = false
+cache_dir = './.cache'
+requirements = []
+[contracts.bitmeme-mint]
+path = 'contracts/bitmeme-mint.clar'
+depends_on = ["bitmeme-trait"]
+clarity_version = 3
+epoch = 3.1
+
+[contracts.bitmeme-trait]
+path = 'contracts/bitmeme-trait.clar'
+clarity_version = 3
+epoch = 3.1
+[repl.analysis]
+passes = ['check_checker']
+
+[repl.analysis.check_checker]
+strict = false
+trusted_sender = false
+trusted_caller = false
+callee_filter = false
+
+[repl.remote_data]
+enabled = false
+api_url = 'https://api.hiro.so'
