@@ -28,6 +28,7 @@ import TwitterSvg from "@/svg/twitter.svg";
 import { notifyError, notifySuccess } from "@/utils/notification";
 import { useClerk } from "@clerk/clerk-expo";
 import * as Network from 'expo-network';
+import useStacksBalance from "@/hooks/misc/useStacksBalance";
 
 
 function Switches() {
@@ -48,7 +49,7 @@ function Switches() {
 export default function Page() {
   const { connection } = useSolanaWallet();
   const { solanaAddress, bitcoinAddress, stacksAddress } = useWalletOnboarding();
-
+  const { data: balance, isLoading, mutate } = useStacksBalance(stacksAddress);
   const { signOut } = useClerk();
 
   const networkState = useNetworkState();
@@ -199,7 +200,10 @@ export default function Page() {
               Welcome to BitMeme!
             </Form.Text>
             <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
-              Your Bitcoin and Solana Wallets are stored locally on your device.{" "}
+              Your STX balance: {balance?.toString()}
+            </Form.Text>
+            <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
+              Your Bitcoin, Solana, and Stacks Wallets are stored locally on your device.{" "}
             </Form.Text>
           </View>
         </Form.Section>

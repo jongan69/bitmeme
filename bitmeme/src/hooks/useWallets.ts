@@ -8,7 +8,7 @@ import { useStacks } from "@/contexts/StacksWalletProvider";
 export function useWalletOnboarding(onReady?: () => void) {
     const { connectDerivedWallet, wallet: bitcoinWallet } = useBitcoinWallet();
     const { login, publicKey } = useSolanaWallet();
-    const { address: stacksAddress, generateStxWallet, loadWalletFromLocalStorage } = useStacks();
+    const { address: stacksAddress, loadWalletFromLocalStorage } = useStacks();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
@@ -35,10 +35,6 @@ export function useWalletOnboarding(onReady?: () => void) {
     useEffect(() => {
         if (!loading && publicKey) {
             connectDerivedWallet();
-            
-            if (!stacksAddress) {
-                generateStxWallet();
-            }
         }
         // Only run when Solana wallet is ready
     }, [loading, publicKey, connectDerivedWallet]);

@@ -1,5 +1,6 @@
 export const requestStxAirdrop = async (address: string) => {
     try {
+        console.log("[DEBUG] requestStxAirdrop:", address);
         const response = await fetch(`/api/stx/faucet`, {
             method: 'POST',
             body: JSON.stringify({ address }),

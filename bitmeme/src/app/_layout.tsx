@@ -1,37 +1,30 @@
 import "../../polyfills";
 
-// import * as pbkdf2 from "pbkdf2";
-// import { Crypto } from "@peculiar/webcrypto";
+import { Suspense, useEffect } from "react";
+import { StatusBar, useColorScheme } from "react-native";
+import { Slot, SplashScreen } from "expo-router";
 
-// Object.assign(global.crypto, new Crypto());
-
-// console.log("PBKDF2:", pbkdf2.pbkdf2);
-// console.log("PBKDF2Sync:", pbkdf2.pbkdf2Sync);
-// console.log("Crypto object:", global.crypto);
-
-import ThemeProvider from "@/components/ui/ThemeProvider";
-import { AsyncFont } from "@/components/data/async-font";
-import { tokenCache } from "@/stores/local/cache";
-import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider as RNThemeProvider,
   Theme,
 } from "@react-navigation/native";
-import { Slot, SplashScreen } from "expo-router";
-import { Suspense, useEffect } from "react";
-import { StatusBar, useColorScheme } from "react-native";
 import { SystemBars } from "react-native-edge-to-edge";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Toast, { BaseToast } from 'react-native-toast-message';
 
+import { AsyncFont } from "@/components/data/async-font";
+import { tokenCache } from "@/stores/local/cache";
+import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";
+
 import { BitcoinWalletProvider } from '@/contexts/BitcoinWalletProvider';
 import { SolanaWalletProvider } from '@/contexts/SolanaWalletProvider';
 import { ZplClientProvider } from '@/contexts/ZplClientProvider';
+import { StacksProvider } from "@/contexts/StacksWalletProvider";
+import ThemeProvider from "@/components/ui/ThemeProvider";
 
 import { SourceCodePro_400Regular } from "@expo-google-fonts/source-code-pro";
-import { StacksProvider } from "@/contexts/StacksWalletProvider";
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 

@@ -5,6 +5,7 @@ import {
     makeContractCall,
     broadcastTransaction,
     stringAsciiCV,
+    // getAddressFromPublicKey,
 } from "@stacks/transactions";
 import { generateMnemonic, mnemonicToSeed } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english';
@@ -13,6 +14,11 @@ import { HDKey } from "@scure/bip32";
 import { STACKS_TESTNET } from "@stacks/network";
 import { requestStxAirdrop } from "@/utils/requestStxAirdrop";
 import { setLocalStorage, getLocalStorage } from "@/utils/localStorage";
+import * as stacksTransactions from '@stacks/transactions';
+// import { c32address } from 'c32check';
+// import { getPublicKey as nobleGetPublicKey } from '@noble/secp256k1';
+// import { ripemd160 } from '@noble/hashes/legacy';
+// import { sha256 } from '@noble/hashes/sha2';
 
 type StacksContextType = {
     mnemonic: string;
@@ -36,23 +42,49 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
     const [log, setLog] = useState("");
     //   const network = STACKS_MAINNET; // Change to STACKS_TESTNET if needed
     const network = STACKS_TESTNET;
+    // 26 for TESTNET, 22 for MAINNET
+    // const versionBytes = network === STACKS_TESTNET ? 26 : 22;
 
     const generateStxWallet = async () => {
         console.log("Generating Stacks wallet (BIP39 mnemonic)");
         try {
             const mnemonic = generateMnemonic(wordlist); // ✅
+            console.log("[DEBUG] mnemonic:", mnemonic);
             const seed = await mnemonicToSeed(mnemonic);
+            console.log("[DEBUG] seed:", seed);
             const rootNode = HDKey.fromMasterSeed(seed);
             const derivationPath = "m/44'/5757'/0'/0/0";
             const childNode = rootNode.derive(derivationPath);
             const stxPrivateKey = Buffer.from(childNode.privateKey!).toString('hex');
+            console.log("[DEBUG] stxPrivateKey:", stxPrivateKey);
+            // Works on Mobile but trying alternative method for web [DO NOT REMOVE]
             const stxAddress = getAddressFromPrivateKey(stxPrivateKey, network);
+
+            // Works on Web, but not confident in logic, would prefer the above
+            // Also does not return in the format the logic below expects
+            // const pubKeyHex = nobleGetPublicKey(stxPrivateKey, true);
+            // console.log("[DEBUG] pubKeyHex:", pubKeyHex);
+            // const pubKeyBytes = typeof pubKeyHex === 'string'
+            //     ? Uint8Array.from((pubKeyHex as string).match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)))
+            //     : pubKeyHex;
+            // console.log("[DEBUG] pubKeyBytes:", pubKeyBytes);
+            // const sha = sha256.create().update(pubKeyBytes).digest();
+            // console.log("[DEBUG] sha:", sha);
+            // const hash160 = ripemd160.create().update(sha).digest();
+            // console.log("[DEBUG] hash160:", hash160);
+            // const hash160Hex = Array.from(hash160).map(b => b.toString(16).padStart(2, '0')).join('');
+            // console.log("hash160Hex:", hash160Hex, "length:", hash160Hex.length);
+            // console.log("typeof hash160Hex:", typeof hash160Hex);
+            // console.log("versionBytes:", versionBytes);
+            // const stxAddress = c32address(versionBytes, hash160Hex);
+            // console.log("[DEBUG] stxAddress:", stxAddress);
 
             await requestStxAirdrop(stxAddress);
 
             const wallet = {
                 accounts: [{ stxPrivateKey }],
             };
+            console.log("wallet:", wallet.accounts[0].stxPrivateKey);
 
             setMnemonic(mnemonic);
             setWallet(wallet as any);
@@ -70,11 +102,13 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const storedWallet = await getLocalStorage<Wallet>("stx-wallet");
             if (!storedWallet) throw new Error("No wallet found in local storage");
+            console.log("storedWallet:", storedWallet);
             setWallet(storedWallet);
             const stxAddress = getAddressFromPrivateKey(
                 storedWallet.accounts[0].stxPrivateKey,
                 network
             );
+            console.log("stxAddress:", stxAddress);
             setAddress(stxAddress);
             setLog("Stacks wallet loaded from local storage!");
         } catch (err: any) {
@@ -126,20 +160,23 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
             if (!wallet) throw new Error("Wallet not initialized");
             const uri = metadataUri || "https://ipfs.io/ipfs/<metadata-hash>";
             console.log("Using URI for NFT:", uri);
+            console.log("wallet:", wallet.accounts[0]);
             console.log("Contract address:", process.env.EXPO_PUBLIC_STACKS_TESTNET_CONTRACT);
+            const senderKey = wallet.accounts[0].stxPrivateKey ?? "f3fe90ab4d099789b6af31104cdc2c3a7c7f6b4659e70b2a418de60830c08521";
+            console.log("senderKey:", senderKey);
             const txOptions = {
                 contractAddress: process.env.EXPO_PUBLIC_STACKS_TESTNET_CONTRACT!, // your contract address
                 contractName: "bitmeme-mint", // your contract name
                 functionName: "claim",
                 functionArgs: [stringAsciiCV(uri)],
-                senderKey: wallet.accounts[0].stxPrivateKey,
-                network: STACKS_TESTNET, // use STACKS_MAINNET for mainnet
+                senderKey: senderKey,
+                network, // use STACKS_MAINNET for mainnet
                 validateWithAbi: true,
             };
             console.log("mintNFT txOptions", txOptions);
             const transaction = await makeContractCall(txOptions);
             console.log("mintNFT transaction", transaction);
-            const response = await broadcastTransaction({ transaction, network: STACKS_TESTNET });
+            const response = await broadcastTransaction({ transaction, network });
             console.log("mintNFT broadcast response", response);
             setLog(`NFT mint transaction sent! TxID: ${response.txid}`);
         } catch (err: any) {
@@ -147,6 +184,13 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
             setLog(`NFT mint error: ${err.message || err}`);
         }
     };
+
+    // Patch if missing
+    if (!('addressFromVersionHash' in (stacksTransactions as any))) {
+        (stacksTransactions as any).addressFromVersionHash = function () {
+            throw new Error('addressFromVersionHash is not available in this environment');
+        };
+    }
 
     return (
         <StacksContext.Provider
