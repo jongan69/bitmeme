@@ -1,0 +1,13 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit",
+    "source.sortMembers": "explicit"
+  },
+  "typescript.preferences.autoImportSpecifierExcludeRegexes": [
+    "^react-native-reanimated/lib/*",
+    "^expo-router/build/*"
+  ],
+  "typescript.tsdk": "node_modules/typescript/lib"
+}

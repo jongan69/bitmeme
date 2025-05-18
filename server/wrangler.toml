@@ -1,0 +1,13 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "bitmeme-server"
+main = "index.ts"
+compatibility_date = "2024-10-11"
+route = { pattern = "bitmeme.tinybase.cloud", custom_domain = true }
+
+[[durable_objects.bindings]]
+name = "BitmemeDurableObjects"
+class_name = "BitmemeDurableObjects"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["BitmemeDurableObjects"]

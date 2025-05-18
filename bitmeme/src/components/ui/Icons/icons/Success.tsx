@@ -1,0 +1,31 @@
+import Svg, { ClipPath, Defs, G, Path, Rect, SvgProps } from "react-native-svg";
+
+interface IconProps {
+  props?: SvgProps;
+  size?: number;
+  color?: string;
+}
+
+export default function SuccessIcon({ props, size = 18, color }: IconProps) {
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 18 18"
+      fill="none"
+      {...props}
+    >
+      <G clipPath="url(#clip0_1638_246)">
+        <Path
+          d="M13.25 2H4.75C3.233 2 2 3.233 2 4.75V13.25C2 14.767 3.233 16 4.75 16H13.25C14.767 16 16 14.767 16 13.25V4.75C16 3.233 14.767 2 13.25 2ZM12.947 6.641C11.088 8.023 9.512 9.931 8.264 12.31C8.135 12.557 7.879 12.712 7.6 12.712H7.597C7.317 12.712 7.061 12.554 6.933 12.305C6.358 11.188 5.715 10.28 4.968 9.529C4.676 9.236 4.677 8.76 4.971 8.468C5.264 8.176 5.74 8.176 6.032 8.471C6.605 9.047 7.122 9.699 7.595 10.443C8.834 8.398 10.329 6.717 12.053 5.436C12.385 5.19 12.855 5.258 13.102 5.591C13.349 5.923 13.28 6.394 12.947 6.641Z"
+          fill="#5FFF82"
+        />
+      </G>
+      <Defs>
+        <ClipPath id="clip0_1638_246">
+          <Rect width={size} height={size} fill={color ?? 'white'} />
+        </ClipPath>
+      </Defs>
+    </Svg>
+  );
+}

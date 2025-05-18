@@ -1,0 +1,501 @@
+:root {
+    --bg-primary: #f7fafd;
+    --bg-secondary: #e9eef6;
+    --text-primary: #181a1b;
+    --text-secondary: #4a4a4a;
+    --border-color: #e0e7ef;
+    --shadow-color: #b0c4d8;
+    --shadow-hover: #0071e3;
+    --brand-color: #0071e3;
+    --brand-gradient: linear-gradient(90deg, #0071e3 0%, #00c6fb 100%);
+    --border-radius: 2.5rem;
+    --border-radius-small: 1.2rem;
+    --button-height: 3.2rem;
+    --glass-bg: rgba(255,255,255,0.85);
+    --glass-blur: 22px;
+    --glass-border: rgba(200,220,255,0.18);
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg-primary: #181a1b;
+      --bg-secondary: #23272e;
+      --text-primary: #f7fafd;
+      --text-secondary: #b0b8c1;
+      --border-color: #23272e;
+      --shadow-color: #23272e;
+      --shadow-hover: #00c6fb;
+      --brand-color: #4fc3f7;
+      --brand-gradient: linear-gradient(90deg, #4fc3f7 0%, #0071e3 100%);
+      --glass-bg: rgba(24,24,28,0.92);
+      --glass-border: rgba(100,120,180,0.18);
+    }
+  }
+  
+  body {
+    scroll-behavior: smooth;
+    background: linear-gradient(135deg, #f7fafd 0%, #e9eef6 100%);
+    min-height: 100vh;
+  }
+  
+  .container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 1.5rem 1.5rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    background: none;
+  }
+  
+  .heroSection, .featuresSection, .howItWorksSection, .socialProofSection {
+    margin: 3.5rem 0 0 0;
+    padding: 3rem 2.5rem;
+    background: var(--glass-bg);
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 32px 0 var(--shadow-color);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1.5px solid var(--glass-border);
+    position: relative;
+    z-index: 1;
+    transition: box-shadow 0.3s, background 0.3s;
+  }
+  .heroSection::before, .featuresSection::before, .howItWorksSection::before, .socialProofSection::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(120deg, #0071e3 0%, #00c6fb 100%);
+    opacity: 0.04;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  
+  .heroContent {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 3.5rem;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .heroActions {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    justify-content: center;
+    margin: 3rem 0 3.5rem 0;
+    width: 100%;
+  }
+  
+  .button {
+    height: var(--button-height);
+    padding: 0 32px;
+    border-radius: var(--border-radius-small);
+    border: none;
+    background: var(--brand-gradient);
+    font-size: 1.15rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.18s, box-shadow 0.18s, background 0.18s;
+    letter-spacing: 0.01em;
+    color: #fff;
+    box-shadow: 0 2px 12px var(--shadow-color);
+    outline: none;
+    border: 1.5px solid var(--brand-color);
+    position: relative;
+    overflow: hidden;
+  }
+  .button:hover, .button:focus {
+    background: linear-gradient(90deg, #00c6fb 0%, #0071e3 100%);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 4px 24px var(--shadow-hover);
+  }
+  .googleButton {
+    background: #fff;
+    color: #222;
+    border: 1.5px solid #e0e7ff;
+    box-shadow: 0 2px 8px #0071e320;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s;
+  }
+  .googleButton:hover, .googleButton:focus {
+    background: #f0fdfa;
+    color: #0071e3;
+    border-color: #00c6fb;
+  }
+  .googleLogo {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .aboutSection h1 {
+    font-size: 3.5rem;
+    margin: 0 0 1.2rem 0;
+    font-weight: 900;
+    color: var(--brand-color);
+    letter-spacing: -0.03em;
+    background: linear-gradient(90deg, #0071e3 0%, #00c6fb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .aboutSection h2 {
+    font-size: 2.2rem;
+    margin: 2rem 0 1rem 0;
+    font-weight: 700;
+    color: var(--brand-color);
+  }
+  .aboutSection h3 {
+    font-size: 1.3rem;
+    margin: 1.5rem 0 0.7rem 0;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .aboutSection p, .aboutSection ul, .aboutSection ol, .aboutSection table {
+    font-size: 1.18rem;
+    color: var(--text-primary);
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+  }
+  .aboutSection ul, .aboutSection ol {
+    padding-left: 1.7rem;
+    margin-bottom: 1.7rem;
+  }
+  .aboutSection li {
+    margin-bottom: 0.7rem;
+  }
+  .aboutSection table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2.2rem;
+    background: rgba(255,255,255,0.7);
+    border-radius: 1.2rem;
+    overflow: hidden;
+    box-shadow: 0 1px 6px var(--shadow-color);
+  }
+  .aboutSection th, .aboutSection td {
+    border: 1px solid var(--border-color);
+    padding: 10px 16px;
+    text-align: left;
+  }
+  .aboutSection th {
+    background: #f0fdfa;
+    color: #0071e3;
+    font-weight: 700;
+  }
+  .aboutSection hr {
+    border: none;
+    border-top: 1.5px solid var(--border-color);
+    margin: 2.5rem 0;
+  }
+  .aboutSection a {
+    color: #00c6fb;
+    text-decoration: underline;
+    transition: color 0.2s;
+  }
+  .aboutSection a:hover {
+    color: #0071e3;
+  }
+  .footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.85rem;
+    padding-top: 2.5rem;
+    margin-top: 4.5rem;
+    border-top: 1.5px solid var(--border-color);
+    background: none;
+  }
+  .privacyButton {
+    background: none;
+    border: none;
+    color: var(--brand-color);
+    font-size: 1.08rem;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    transition: color 0.2s;
+  }
+  .privacyButton:hover {
+    color: #00c6fb;
+    text-decoration: underline;
+  }
+  .copyright {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+  @media (max-width: 700px) {
+    .container {
+      padding: 0.7rem;
+    }
+    .heroSection, .featuresSection, .howItWorksSection, .socialProofSection {
+      padding: 1.2rem;
+      margin: 2rem 0 0 0;
+    }
+    .aboutSection h1 {
+      font-size: 2.2rem;
+    }
+    .aboutSection h2 {
+      font-size: 1.2rem;
+    }
+    .aboutSection h3 {
+      font-size: 1.05rem;
+    }
+    .featuresTitle, .howItWorksTitle {
+      font-size: 1.5rem;
+    }
+    .featuresGrid {
+      gap: 0.7rem;
+    }
+    .featureItem {
+      min-width: 120px;
+      max-width: 150px;
+      flex: 1 1 130px;
+      padding: 0.7rem 0.3rem;
+    }
+    .featureIcon {
+      font-size: 1.5rem;
+      margin-bottom: 0.7rem;
+    }
+    .howItWorksGrid {
+      gap: 1.1rem;
+    }
+    .howItWorksStep {
+      padding: 1.1rem 0.5rem;
+    }
+    .howItWorksIcon {
+      font-size: 1.5rem;
+      margin-bottom: 0.7rem;
+    }
+    .appBadges {
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+    .appBadges img {
+      height: 32px;
+    }
+    .testimonial {
+      font-size: 1rem;
+      padding: 1rem 0.5rem;
+    }
+    .testimonial footer {
+      font-size: 0.95rem;
+    }
+    .socialLinks {
+      gap: 0.7rem;
+      margin-bottom: 0.7rem;
+    }
+    .socialLinks img {
+      width: 26px;
+      height: 26px;
+    }
+    .contactLink {
+      font-size: 0.95rem;
+      margin-bottom: 0.4rem;
+    }
+    .footer {
+      gap: 0.5rem;
+      padding-top: 1.2rem;
+      margin-top: 2.2rem;
+    }
+    .privacyButton {
+      font-size: 0.95rem;
+    }
+    .copyright {
+      font-size: 0.8rem;
+    }
+  }
+
+  .featuresTitle, .howItWorksTitle {
+    margin: 0 0 2.5rem 0;
+    text-align: center;
+    font-size: 2.7rem;
+    font-weight: 800;
+    color: var(--brand-color);
+    background: linear-gradient(90deg, #0071e3 0%, #00c6fb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .featuresGrid {
+    display: flex;
+    flex-direction: row;
+    gap: 1.2rem;
+    justify-content: center;
+    z-index: 1;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+  .featuresGrid::-webkit-scrollbar,
+  .featuresGrid::after,
+  .featuresGrid::before {
+    display: none !important;
+  }
+  .featureItem {
+    min-width: 160px;
+    max-width: 200px;
+    flex: 1 1 180px;
+    margin-bottom: 0;
+    padding: 1.2rem 0.7rem;
+    border-radius: 1.2rem;
+    background: rgba(35, 194, 215, 0.7);
+    border: 1.5px solid var(--border-color);
+    box-shadow: 0 2px 12px var(--shadow-color);
+    transition: transform 0.18s, box-shadow 0.18s, background 0.18s, border-color 0.18s;
+    will-change: transform;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+  .featureItem:hover {
+    background: #f0fdfa;
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 6px 18px var(--shadow-hover);
+    border-color: var(--shadow-hover);
+    z-index: 2;
+  }
+  .featureIcon {
+    display: block;
+    font-size: 2.7rem;
+    text-align: center;
+    margin-bottom: 1.2rem;
+  }
+  .featureItem h3 {
+    font-weight: 700;
+    margin-bottom: 0.7rem;
+    letter-spacing: -0.01em;
+    color: var(--brand-color);
+    font-size: 1.25rem;
+  }
+  .featureItem p {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-size: 1.13rem;
+  }
+  .howItWorksGrid {
+    display: flex;
+    flex-direction: row;
+    gap: 2.5rem;
+    justify-content: center;
+    align-items: stretch;
+  }
+  .howItWorksStep {
+    flex: 1;
+    background: rgba(255,255,255,0.92);
+    border-radius: 1.7rem;
+    box-shadow: 0 2px 12px var(--shadow-color);
+    padding: 2.2rem 1.7rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.18s, box-shadow 0.18s, background 0.18s;
+  }
+  .howItWorksStep:hover {
+    background: #f0fdfa;
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 6px 24px var(--shadow-hover);
+  }
+  .howItWorksIcon {
+    font-size: 2.7rem;
+    margin-bottom: 1.2rem;
+    color: #00c6fb;
+  }
+  @media (max-width: 900px) {
+    .heroContent {
+      flex-direction: column;
+      align-items: center;
+      gap: 2.5rem;
+    }
+    .heroMockup {
+      max-width: 95vw;
+      margin-top: 2rem;
+    }
+    .howItWorksGrid {
+      flex-direction: column;
+      gap: 1.7rem;
+    }
+    .heroActions {
+      flex-direction: column;
+      align-items: center;
+      gap: 1.3rem;
+      margin: 2rem 0 2.5rem 0;
+    }
+  }
+  .socialProofSection {
+    text-align: center;
+  }
+  .appBadges {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+  }
+  .appBadges img {
+    height: 54px;
+    transition: transform 0.18s, box-shadow 0.18s;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    border-radius: 0.9rem;
+    background: #fff;
+  }
+  .appBadges img:hover {
+    transform: scale(1.09) translateY(-2px);
+    box-shadow: 0 6px 24px var(--shadow-hover);
+  }
+  .testimonial {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    font-style: italic;
+    margin: 0 auto 1.2rem auto;
+    max-width: 540px;
+    background: rgba(17, 200, 237, 0.8);
+    border-radius: 1.2rem;
+    padding: 1.7rem 1.2rem;
+    box-shadow: 0 1px 6px var(--shadow-color);
+  }
+  .testimonial footer {
+    font-size: 1.05rem;
+    color: var(--brand-color);
+    font-style: normal;
+    margin-top: 1.2rem;
+  }
+  .socialLinks {
+    display: flex;
+    flex-direction: row;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-bottom: 1.2rem;
+  }
+  .socialLinks img {
+    width: 36px;
+    height: 36px;
+    filter: grayscale(0.2);
+    transition: filter 0.2s, transform 0.18s;
+  }
+  .socialLinks img:hover {
+    filter: grayscale(0) drop-shadow(0 2px 8px var(--shadow-hover));
+    transform: scale(1.13);
+  }
+  .contactLink {
+    color: var(--brand-color);
+    font-size: 1.08rem;
+    margin-bottom: 0.7rem;
+    display: inline-block;
+    text-decoration: underline;
+    transition: color 0.2s;
+  }
+  .contactLink:hover {
+    color: #00c6fb;
+  }
