@@ -24,15 +24,17 @@ const generateAPIUrl = (relativePath: string) => {
 
   const path = relativePath.startsWith("/") ? relativePath : `/${relativePath}`;
 
+  let url;
   if (process.env.NODE_ENV === "development") {
-    return origin.concat(path);
+    url = origin.concat(path);
+  } else {
+    if (!API_URL) {
+      throw new Error("API_URL environment variable is not defined");
+    }
+    url = API_URL.concat(path);
   }
-
-  if (!API_URL) {
-    throw new Error("API_URL environment variable is not defined");
-  }
-
-  return API_URL.concat(path);
+  console.log("[generateAPIUrl] Final URL:", url);
+  return url;
 };
 
 interface Meme {
@@ -60,7 +62,9 @@ export default function MemeGenerator() {
     setSelectedMeme(null);
     setCaption("");
 
-    const response = await fetch(generateAPIUrl("/api/ai"), {
+    const apiUrl = generateAPIUrl("/api/ai");
+    console.log("[handleGenerate] Using API URL:", apiUrl);
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content: prompt }),
