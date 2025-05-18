@@ -9,7 +9,7 @@ import { useUser } from "@clerk/clerk-expo";
 
 export const unstable_settings = {
   index: {
-      initialRouteName: "home",
+    initialRouteName: "index",
   },
   meme: {
       initialRouteName: "meme",
