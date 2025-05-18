@@ -37,6 +37,8 @@ import {
   ImpactFeedbackStyle
 } from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Stx from "@/svg/stx.svg";
+
 
 const ABlurView = Animated.createAnimatedComponent(BlurView);
 
@@ -220,7 +222,7 @@ function GloryModal({
   );
 }
 
-export function GlurryList({ setShow, solanaWalletAddress, bitcoinAddress }: { setShow: (show: boolean) => void, solanaWalletAddress: string, bitcoinAddress: string }) {
+export function GlurryList({ setShow, solanaWalletAddress, bitcoinAddress, stacksAddress }: { setShow: (show: boolean) => void, solanaWalletAddress: string, bitcoinAddress: string, stacksAddress: string }) {
   const [showToast, setShowToast] = React.useState(false);
   const providers = [
     {
@@ -236,6 +238,13 @@ export function GlurryList({ setShow, solanaWalletAddress, bitcoinAddress }: { s
       color: "#4285F4",
       selected: false,
       address: solanaWalletAddress,
+    },
+    {
+      title: "Stacks",
+      icon: "https://simpleicons.org/icons/stacks.svg",
+      color: "#4285F4",
+      selected: false,
+      address: stacksAddress,
     },
   ];
 
@@ -286,15 +295,26 @@ export function GlurryList({ setShow, solanaWalletAddress, bitcoinAddress }: { s
                         : "transparent",
                     }}
                   >
-                    <Image
-                      source={{ uri: provider.icon }}
-                      tintColor={provider.color}
-                      style={{
-                        tintColor: provider.color,
-                        aspectRatio: 1,
-                        height: 24,
-                      }}
-                    />
+                    {provider.title === "Stacks" ? (
+                      <Stx
+                        width={24}
+                        height={24}
+                        style={{
+                          aspectRatio: 1,
+                          height: 24,
+                        }}
+                      />
+                    ) : (
+                      <Image
+                        source={{ uri: provider.icon }}
+                        tintColor={provider.color}
+                        style={{
+                          tintColor: provider.color,
+                          aspectRatio: 1,
+                          height: 24,
+                        }}
+                      />
+                    )}
                     <View style={{ gap: 4 }}>
                       <Form.Text style={Form.FormFont.default}>
                         {provider.title}

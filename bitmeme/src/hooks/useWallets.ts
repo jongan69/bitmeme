@@ -3,10 +3,12 @@ import { useSolanaWallet } from "@/contexts/SolanaWalletProvider";
 import { getLocalStorage, setLocalStorage } from "@/utils/localStorage";
 import { notifyError, notifySuccess } from "@/utils/notification";
 import { useEffect, useState } from "react";
+import { useStacks } from "@/contexts/StacksWalletProvider";
 
 export function useWalletOnboarding(onReady?: () => void) {
     const { connectDerivedWallet, wallet: bitcoinWallet } = useBitcoinWallet();
     const { login, publicKey } = useSolanaWallet();
+    const { address: stacksAddress, generateStxWallet, loadWalletFromLocalStorage } = useStacks();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
@@ -16,7 +18,9 @@ export function useWalletOnboarding(onReady?: () => void) {
             setLoading(true);
             setError(null);
             try {
+                await loadWalletFromLocalStorage();
                 await login();
+                console.log("Solana wallet loaded: ", publicKey?.toBase58());
             } catch (err) {
                 notifyError("Failed to load Solana wallet.");
                 setError(err as Error);
@@ -31,6 +35,10 @@ export function useWalletOnboarding(onReady?: () => void) {
     useEffect(() => {
         if (!loading && publicKey) {
             connectDerivedWallet();
+            
+            if (!stacksAddress) {
+                generateStxWallet();
+            }
         }
         // Only run when Solana wallet is ready
     }, [loading, publicKey, connectDerivedWallet]);
@@ -51,10 +59,18 @@ export function useWalletOnboarding(onReady?: () => void) {
         notifyIfNeeded();
     }, [bitcoinWallet?.p2tr, onReady]);
 
+    // Log when stacksAddress is set
+    useEffect(() => {
+        if (stacksAddress) {
+            console.log("Stacks wallet loaded: ", stacksAddress);
+        }
+    }, [stacksAddress]);
+
     return {
         loading,
         error,
         solanaAddress: publicKey?.toBase58(),
         bitcoinAddress: bitcoinWallet?.p2tr,
+        stacksAddress,
     };
 }

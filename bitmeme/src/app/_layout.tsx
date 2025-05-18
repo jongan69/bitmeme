@@ -22,6 +22,7 @@ import { SolanaWalletProvider } from '@/contexts/SolanaWalletProvider';
 import { ZplClientProvider } from '@/contexts/ZplClientProvider';
 
 import { SourceCodePro_400Regular } from "@expo-google-fonts/source-code-pro";
+import { StacksProvider } from "@/contexts/StacksWalletProvider";
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
@@ -85,10 +86,11 @@ export default function Layout() {
                 <SolanaWalletProvider>
                   <ZplClientProvider>
                     <BitcoinWalletProvider>
-                      <Slot />
-                      <StatusBar animated />
-                      <SystemBars style={"auto"} />
-                      {/* <Stack screenOptions={{ headerShown: false }}>
+                      <StacksProvider>
+                        <Slot />
+                        <StatusBar animated />
+                        <SystemBars style={"auto"} />
+                        {/* <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="(index)" />
                 <Stack.Screen name="(auth)" />
                 <Stack.Screen name="+not-found" />
@@ -104,54 +106,55 @@ export default function Layout() {
                   }}
                 />
               </Stack> */}
-                      {/* <StatusBar style="auto" /> */}
+                        {/* <StatusBar style="auto" /> */}
 
-                      <Toast
-                        config={{
-                          warning: (props) => (
-                            <BaseToast
-                              {...props}
-                              style={{ borderLeftColor: 'orange' }}
-                              contentContainerStyle={{ backgroundColor: '#FFFBEA' }}
-                              text1Style={{
-                                color: '#B7791F',
-                                fontWeight: 'bold',
-                              }}
-                              text2Style={{
-                                color: '#B7791F',
-                              }}
-                            />
-                          ),
-                          txSuccess: ({ props }) => (
-                            <BaseToast
-                              style={{ borderLeftColor: '#22c55e' }}
-                              contentContainerStyle={{ backgroundColor: '#F0FFF4' }}
-                              text1="Transaction Successful"
-                              text1Style={{ color: '#166534', fontWeight: 'bold' }}
-                              text2Style={{ color: '#166534' }}
-                              text2={
-                                props?.txId && props?.solanaNetwork
-                                  ? `Network: ${props.solanaNetwork} | TxID: ${props.txId}`
-                                  : props?.txId
-                                    ? `TxID: ${props.txId}`
-                                    : props?.chain
-                                      ? `Network: ${props.chain}`
-                                      : ''
-                              }
-                            />
-                          ),
-                          txFail: ({ props }) => (
-                            <BaseToast
-                              style={{ borderLeftColor: '#ef4444' }}
-                              contentContainerStyle={{ backgroundColor: '#FFF0F0' }}
-                              text1="Transaction Failed"
-                              text1Style={{ color: '#991b1b', fontWeight: 'bold' }}
-                              text2Style={{ color: '#991b1b' }}
-                              text2={props?.chain ? `Network: ${props.chain}` : ''}
-                            />
-                          ),
-                        }}
-                      />
+                        <Toast
+                          config={{
+                            warning: (props) => (
+                              <BaseToast
+                                {...props}
+                                style={{ borderLeftColor: 'orange' }}
+                                contentContainerStyle={{ backgroundColor: '#FFFBEA' }}
+                                text1Style={{
+                                  color: '#B7791F',
+                                  fontWeight: 'bold',
+                                }}
+                                text2Style={{
+                                  color: '#B7791F',
+                                }}
+                              />
+                            ),
+                            txSuccess: ({ props }) => (
+                              <BaseToast
+                                style={{ borderLeftColor: '#22c55e' }}
+                                contentContainerStyle={{ backgroundColor: '#F0FFF4' }}
+                                text1="Transaction Successful"
+                                text1Style={{ color: '#166534', fontWeight: 'bold' }}
+                                text2Style={{ color: '#166534' }}
+                                text2={
+                                  props?.txId && props?.solanaNetwork
+                                    ? `Network: ${props.solanaNetwork} | TxID: ${props.txId}`
+                                    : props?.txId
+                                      ? `TxID: ${props.txId}`
+                                      : props?.chain
+                                        ? `Network: ${props.chain}`
+                                        : ''
+                                }
+                              />
+                            ),
+                            txFail: ({ props }) => (
+                              <BaseToast
+                                style={{ borderLeftColor: '#ef4444' }}
+                                contentContainerStyle={{ backgroundColor: '#FFF0F0' }}
+                                text1="Transaction Failed"
+                                text1Style={{ color: '#991b1b', fontWeight: 'bold' }}
+                                text2Style={{ color: '#991b1b' }}
+                                text2={props?.chain ? `Network: ${props.chain}` : ''}
+                              />
+                            ),
+                          }}
+                        />
+                      </StacksProvider>
                     </BitcoinWalletProvider>
                   </ZplClientProvider>
                 </SolanaWalletProvider>

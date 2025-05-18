@@ -47,8 +47,7 @@ function Switches() {
 
 export default function Page() {
   const { connection } = useSolanaWallet();
-  const { solanaAddress, bitcoinAddress } = useWalletOnboarding();
-  console.log('connection', connection);
+  const { solanaAddress, bitcoinAddress, stacksAddress } = useWalletOnboarding();
 
   const { signOut } = useClerk();
 
@@ -122,6 +121,7 @@ export default function Page() {
           setShow={setShow}
           solanaWalletAddress={solanaAddress?.toString() ?? ''}
           bitcoinAddress={bitcoinAddress ?? ''}
+          stacksAddress={stacksAddress ?? ''}
         />
       }
       <Stack.Screen
