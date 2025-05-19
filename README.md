@@ -1,56 +1,46 @@
-# BitMeme: Viral Bitcoin-Powered Meme Marketplace
+# BitMeme – AI-Powered Meme Generator with Lightning Tipping
 
-## Submission for Bitcoin 2025 Official Hackathon
-
-**Project Type:** Bitcoin++ | Blockchain | Fintech | Beginner Friendly
+**Submission for Bitcoin 2025 Official Hackathon**
 
 ---
 
 ## Overview
-BitMeme is a decentralized, Bitcoin-native meme marketplace and social platform that empowers users to create and monetize viral memes as unique digital assets. By leveraging Bitcoin's security and emerging protocols, BitMeme brings the culture of internet memes to the world's most trusted blockchain, enabling creators and collectors to participate in a new, fun, and open digital economy.
+BitMeme is a mobile app that empowers users to create hilarious, viral-ready memes using AI, and instantly tip their favorite memes with Bitcoin. BitMeme combines OpenAI's advanced language generation, the [memegen.link](https://memegen.link) API for meme image rendering, and mints memes as NFTs on the STX blockchain. The app supports Bitcoin, Solana, and STX for seamless micropayments and tipping.
 
 ---
 
 ## The Problem
-Memes are the language of the internet, but meme creators rarely get rewarded for their creativity. Current meme platforms are centralized, offer no true ownership, and lack transparent monetization. There's no way to prove meme authenticity, track provenance, or enable direct peer-to-peer trading using Bitcoin.
+Memes are the language of the internet, but meme creators rarely get rewarded for their creativity. Current meme platforms lack true ownership, transparent monetization, and direct peer-to-peer tipping using Bitcoin or other cryptocurrencies. There is no easy way to create, share, and monetize memes in a decentralized, user-friendly way.
 
 ---
 
 ## The Solution
 BitMeme solves these problems by:
-- **Minting Memes as Bitcoin-native Digital Assets:** Each meme is minted as a unique, tradable asset (e.g., via Ordinals, BRC-20, or other Bitcoin metaprotocols).
-- **Decentralized Marketplace:** Users can buy, sell, and auction memes using Bitcoin, with transparent royalties for creators.
-- **Social Layer:** Like, share, and remix memes. Viral memes earn more as they spread.
-- **On-chain Provenance:** Every meme's history, ownership, and creator are verifiable on Bitcoin.
-- **Open APIs:** Developers can build meme bots, analytics, and integrations.
+- **AI-Powered Meme Creation:** Users describe their meme idea, and BitMeme uses OpenAI (gpt-4-turbo) to select the best meme template and generate witty captions.
+- **Instant Meme Rendering:** Memes are rendered in real-time using [memegen.link](https://api.memegen.link/images) and minted as NFTs on STX.
+- **Bitcoin & Crypto Tipping:** Instantly tip your favorite memes using Bitcoin, Solana, or STX with a seamless in-app wallet.
+- **On-Chain Provenance:** Every meme's history, ownership, and creator are verifiable on-chain.
+- **Mobile-First Social Experience:** View, share, and remix memes in a fun, viral feed.
 
 ---
 
 ## Key Features
-- **Bitcoin-Only Payments:** All transactions are settled in Bitcoin (on-chain or Lightning).
-- **Creator Royalties:** Automatic, transparent royalty payments to meme creators on every resale.
-- **Remix & Collaboration:** Users can fork/remix memes, with royalties split among contributors.
-- **Viral Leaderboards:** Track the most viral and valuable memes in real time.
-- **Mobile-First UX:** Intuitive, meme-centric interface for rapid creation and sharing.
-- **Privacy-Respecting:** No KYC, minimal data collection, and optional anonymous trading.
-
----
-
-## Tech Stack
-- **Bitcoin Protocols:** Ordinals, BRC-20, Lightning Network, or sBTC (Stacks) for programmability.
-- **Frontend:** React Native (Expo) for cross-platform mobile/web app.
-- **Backend:** Node.js, Express, and integration with Bitcoin full node or APIs (e.g., Blockstream, Mempool.space).
-- **Smart Contracts:** (If using Stacks/sBTC or other Bitcoin L2s) for advanced features.
-- **Storage:** Decentralized (IPFS, Arweave) for meme media.
-- **APIs:** Open REST/GraphQL for third-party integrations.
+- **Describe Your Meme:** Enter a prompt describing your meme idea (e.g., "when your code finally compiles").
+- **AI-Powered Creation:** BitMeme uses OpenAI (gpt-4-turbo) to select the best meme template and generate captions.
+- **Instant Rendering:** Memes are rendered in real-time and minted as STX NFTs.
+- **Meme Feed & Sharing:** Instantly see your most recently generated meme and share or remix it.
+- **Regenerate:** Not satisfied? Tap "Generate Again" to remix your prompt.
+- **Bitcoin Tipping:** Each meme features a "❤️" button for instant tipping with your coin of choice.
+- **Seamless Payments:** Use the in-app wallet for fast, easy payments.
+- **Instant Feedback:** Get notified when your tip is successful.
 
 ---
 
 ## Why BitMeme Stands Out
-- **First Bitcoin-Native Meme Marketplace:** Most meme/NFT platforms are on altchains. BitMeme is Bitcoin-first.
-- **Empowers Creators:** Direct, transparent monetization for meme artists.
+- **First AI-Powered Meme Generator with Bitcoin Tipping:** Most meme platforms are centralized and lack crypto-native features. BitMeme is Bitcoin-first and AI-driven.
+- **Empowers Creators:** Direct, transparent monetization for meme artists via tips and NFT minting.
 - **Viral by Design:** Social features and remixing drive engagement and value.
-- **Open & Extensible:** APIs and open standards invite community innovation.
+- **Open & Extensible:** Built with open APIs and standards for future integrations.
 - **Beginner Friendly:** Simple onboarding, no crypto jargon, and fun UX.
 
 ---
@@ -60,7 +50,7 @@ BitMeme solves these problems by:
 - **Best Use of sBTC:** (If implemented) Programmable meme trading on Stacks.
 - **Best Design:** Focus on viral, accessible, and delightful UX.
 - **Most Educational:** Promotes Bitcoin adoption through meme culture.
-- **Quirkiest Hack:** Memes + Bitcoin = Internet magic.
+- **Quirkiest Hack:** Memes + Bitcoin + AI = Internet magic.
 
 ---
 
@@ -86,4 +76,17 @@ BitMeme solves these problems by:
 
 ---
 
-*Submission for the Bitcoin 2025 Official Hackathon. Let's make Bitcoin fun, viral, and creator-friendly!*
+## Development
+
+This project is built with [Expo](https://expo.dev/) and React Native. For development, clone the repo and install dependencies:
+
+```sh
+bun install
+bunx expo install
+```
+
+---
+
+## License
+
+MIT
