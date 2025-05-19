@@ -1,4 +1,4 @@
-# BitMeme – AI-Powered Meme Generator with Lightning Tipping
+# BitMeme – AI-Powered Meme Generator with Crypto Tipping
 
 BitMeme is a mobile app that empowers users to create hilarious, viral-ready memes using AI, and instantly tip their favorite memes with Bitcoin. BitMeme combines OpenAI's advanced language generation, the [memegen.link](https://memegen.link) API for meme image rendering, minted as NFTs on STX blockchain and Bitcoin, Solana and STX for micropayments.
 

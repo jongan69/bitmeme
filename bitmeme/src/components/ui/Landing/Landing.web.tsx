@@ -33,9 +33,9 @@ export default function Landing({
         <div className={styles.heroContent}>
           <div className={styles.aboutSection}>
             <h1>About BitMeme</h1>
-            <h2>📱 BitMeme – AI-Powered Meme Generator with Lightning Tipping</h2>
+            <h2>📱 BitMeme – AI-Powered Meme Generator with Crypto Tipping</h2>
             <p>
-              <b>BitMeme</b> is a mobile app that empowers users to create hilarious, viral-ready memes using AI, and instantly tip their favorite memes with Bitcoin via the Lightning Network. BitMeme combines OpenAI's advanced language generation, the <a href="https://memegen.link">memegen.link</a> API for meme image rendering, and ZBD for seamless Bitcoin micropayments.
+              <b>BitMeme</b> is a mobile app that empowers users to create hilarious, viral-ready memes using AI, and instantly tip their favorite memes with Bitcoin. BitMeme combines OpenAI's advanced language generation, the <a href="https://memegen.link">memegen.link</a> API for meme image rendering, and ZBD for seamless Bitcoin micropayments.
             </p>
             <hr />
             <h2>🔥 Key Features</h2>
@@ -51,10 +51,9 @@ export default function Landing({
               <li><b>Regenerate:</b> Not satisfied? Tap "Generate Again" to remix your prompt.</li>
               <li><b>Share & Save:</b> Download or share memes directly from the app using your device's sharing options.</li>
             </ul>
-            <h3>Bitcoin Lightning Tipping</h3>
+            <h3>Bitcoin Tipping</h3>
             <ul>
-              <li><b>Tip Memes You Love:</b> Each meme features a "⚡ Tip Meme" button.</li>
-              <li><b>Seamless Payments:</b> Generate a Lightning invoice (100–1000 sats) via ZBD and pay with your favorite wallet (Phoenix, Breez, Wallet of Satoshi, etc.).</li>
+              <li><b>Tip Memes You Love:</b> Each meme features a "❤️" button.</li>
               <li><b>Instant Feedback:</b> Get notified when your tip is successful (e.g., "Thanks for tipping 250 sats!").</li>
             </ul>
             <h3>(Optional) Meme History & Profile</h3>
@@ -111,7 +110,7 @@ export default function Landing({
             </ul>
             <hr />
             <p>
-              BitMeme makes meme creation fun, social, and rewarding—powered by the latest in AI and Bitcoin Lightning technology.
+              BitMeme makes meme creation fun, social, and rewarding—powered by the latest in AI and Bitcoin technology.
             </p>
           </div>
           {/* <div className={styles.heroMockup}>
@@ -175,7 +174,7 @@ export default function Landing({
           <div className={styles.howItWorksStep}>
             <span className={styles.howItWorksIcon}>⚡</span>
             <h4>Render, share, and tip</h4>
-            <p>See your meme, share it, and tip with Bitcoin Lightning!</p>
+            <p>See your meme, share it, and tip with Bitcoin!</p>
           </div>
         </div>
       </section>

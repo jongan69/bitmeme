@@ -1,4 +1,4 @@
-# BitMeme – AI-Powered Meme Generator with Lightning Tipping
+# BitMeme – AI-Powered Meme Generator with Crypto Tipping
 
 **Submission for Bitcoin 2025 Official Hackathon**
 
