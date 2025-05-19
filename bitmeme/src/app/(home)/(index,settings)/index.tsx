@@ -77,7 +77,7 @@ export default function Page() {
                       fontSize: 20,
                     }}
                   >
-                    Memebit
+                    Bitmeme
                   </Text>
                 </Animated.View>
               </View>

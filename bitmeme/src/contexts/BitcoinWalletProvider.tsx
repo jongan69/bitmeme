@@ -1,5 +1,6 @@
-import { PublicKey } from "@solana/web3.js";
 import "../../polyfills";
+
+import { PublicKey } from "@solana/web3.js";
  
 import * as bitcoin from "bitcoinjs-lib";
 

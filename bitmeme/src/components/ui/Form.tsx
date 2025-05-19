@@ -372,6 +372,7 @@ export function Link({
                     WebBrowser.WebBrowserPresentationStyle.AUTOMATIC,
                 });
               } else if (
+                // @ts-ignore
                 props.target === "share" &&
                 // Ensure the resolved href is an external URL.
                 /^([\w\d_+.-]+:)?\/\//.test(RouterLink.resolveHref(props.href))
@@ -438,8 +439,11 @@ export function Section({
     }
 
     // If the child is a fragment, unwrap it and add the children to the list
-    if (child.type === React.Fragment && child.props?.key == null) {
-      React.Children.forEach(child.props?.children, (child) => {
+    if (
+      child.type === React.Fragment &&
+      (child as React.ReactElement).key == null
+    ) {
+      React.Children.forEach((child as React.ReactElement<{ children?: React.ReactNode }>).props.children, (child) => {
         if (!React.isValidElement(child)) {
           return child;
         }
@@ -458,7 +462,7 @@ export function Section({
     const isLastChild = index === allChildren.length - 1;
 
     const resolvedProps = {
-      ...child.props,
+      ...(child as React.ReactElement<any>).props,
     };
 
     // Set the hint for the hintBoolean prop.
@@ -590,7 +594,7 @@ export function Section({
         });
       })();
 
-      child = React.cloneElement(child, {
+      child = React.cloneElement(child as React.ReactElement<any>, {
         style: [
           FormFont.default,
           process.env.EXPO_OS === "web" && {
@@ -628,7 +632,11 @@ export function Section({
     }
 
     // Ensure child is a FormItem otherwise wrap it in a FormItem
-    if (!wrapsFormItem && !child.props.custom && child.type !== FormItem) {
+    if (
+      !wrapsFormItem &&
+      !(child as React.ReactElement<any>).props.custom &&
+      child.type !== FormItem
+    ) {
       child = (
         <FormItem onPress={originalOnPress} onLongPress={originalOnLongPress}>
           {child}
@@ -637,10 +645,10 @@ export function Section({
     }
 
     return (
-      <>
+      <React.Fragment key={index}>
         {child}
         {!isLastChild && <Separator />}
-      </>
+      </React.Fragment>
     );
   });
 
@@ -768,7 +776,7 @@ function isStringishNode(node: React.ReactNode): boolean {
       typeof child.props === "object" &&
       child.props !== null
     ) {
-      containsStringChildren = isStringishNode(child.props.children as any);
+      containsStringChildren = isStringishNode((child as React.ReactElement<any>).props.children as any);
     }
   });
   return containsStringChildren;
@@ -792,7 +800,7 @@ function SymbolView({
   const symbolProps: SystemImageCustomProps =
     typeof systemImage === "object" && "name" in systemImage
       ? systemImage
-      : { name: systemImage as unknown as string };
+      : { name: systemImage as IconSymbolName };
 
   return (
     <IconSymbol
@@ -826,9 +834,9 @@ function LinkChevronIcon({
       }
       return (
         <IconSymbol
-          name={systemImage.name}
-          size={systemImage.size ?? size}
-          color={systemImage.color ?? AppleColors.tertiaryLabel}
+          name={(systemImage as SystemImageCustomProps).name}
+          size={(systemImage as SystemImageCustomProps).size ?? size}
+          color={(systemImage as SystemImageCustomProps).color ?? AppleColors.tertiaryLabel}
         />
       );
     }
@@ -843,12 +851,9 @@ function LinkChevronIcon({
 
   return (
     <IconSymbol
-      name={resolvedName}
+      name={resolvedName as IconSymbolName}
       size={size}
       weight="bold"
-      // from xcode, not sure which color is the exact match
-      // #BFBFBF
-      // #9D9DA0
       color={AppleColors.tertiaryLabel}
     />
   );

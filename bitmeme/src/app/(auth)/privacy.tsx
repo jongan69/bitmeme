@@ -18,7 +18,7 @@ export default function PrivacyPolicy() {
           1. Information We Collect
         </ThemedText>
         <ThemedText style={styles.paragraph}>
-          When you use the memebit app, we collect the following information:
+          When you use the Bitmeme app, we collect the following information:
         </ThemedText>
         <ThemedText style={styles.listItem}>
           • Email address and basic profile information when you sign up or log in
@@ -103,7 +103,7 @@ export default function PrivacyPolicy() {
           6. Children's Privacy
         </ThemedText>
         <ThemedText style={styles.paragraph}>
-          memebit is not intended for use by children under the age of 13. We do not knowingly collect personal information from children under 13.
+          Bitmeme is not intended for use by children under the age of 13. We do not knowingly collect personal information from children under 13.
         </ThemedText>
       </View>
 
@@ -124,7 +124,7 @@ export default function PrivacyPolicy() {
           If you have any questions about this privacy policy or our practices, please contact us at:
         </ThemedText>
         <ThemedText style={styles.contact}>
-          support@memebit.app
+          support@bitmeme.app
         </ThemedText>
       </View>
     </BodyScrollView>

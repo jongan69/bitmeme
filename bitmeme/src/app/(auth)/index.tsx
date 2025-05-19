@@ -27,6 +27,11 @@ export default function SignIn() {
   });
 
   const handleSignInWithGoogle = React.useCallback(async () => {
+    if (isSignedIn) {
+      notifyError("You're already signed in.");
+      router.replace("/(home)/(index)");
+      return;
+    }
     if (process.env.EXPO_OS === "ios") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
@@ -46,7 +51,7 @@ export default function SignIn() {
         await setActive!({ session: createdSessionId });
         router.replace("/(home)/(index)");
       } else {
-        notifyError('Failed to sign in');
+        notifyError('Failed to sign in: Unknown error');
       }
     } catch (err) {
       // See https://clerk.com/docs/custom-flows/error-handling
@@ -55,7 +60,7 @@ export default function SignIn() {
       console.error(JSON.stringify(err, null, 2));
       notifyError('Failed to sign in');
     }
-  }, []);
+  }, [isSignedIn, router, startSSOFlow]);
 
   const onNavigatePress = React.useCallback(
     (href: string) => {

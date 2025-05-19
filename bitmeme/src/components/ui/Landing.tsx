@@ -17,9 +17,9 @@ type LandingProps = {
 };
 
 const FEATURES = [
-  { icon: "🔥", text: "Fast meme creation" },
-  { icon: "🔒", text: "Secure on Solana" },
-  { icon: "🌐", text: "Share with friends" },
+  { icon: "🔥", text: "AI meme creation" },
+  { icon: "🔒", text: "Mint on STX" },
+  { icon: "🌐", text: "Tip with crypto" },
 ];
 
 export default function Landing({

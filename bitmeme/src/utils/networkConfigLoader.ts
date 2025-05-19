@@ -1,4 +1,3 @@
-import "../../polyfills";
 import * as borsh from "@coral-xyz/borsh";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { getLocalStorage, setLocalStorage } from "./localStorage";
