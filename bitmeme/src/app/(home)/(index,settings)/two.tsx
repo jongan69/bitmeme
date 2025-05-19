@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { FadeIn } from "@/components/ui/FadeIn";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import Skeleton from "@/components/ui/Skeleton";
+import Skeleton from "@/components/ui/Skeleton/Skeleton";
 import TouchableBounce from "@/components/ui/TouchableBounce";
 import * as AC from "@bacons/apple-colors";
 import { useState } from "react";

@@ -1,4 +1,4 @@
-import Landing from "@/components/ui/Landing";
+import Landing from "@/components/ui/Landing/Landing";
 import { useWalletOnboarding } from "@/hooks/useWallets";
 import { useWarmUpBrowser } from "@/hooks/useWarmUpBrowser";
 import { notifyError } from "@/utils/notification";

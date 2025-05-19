@@ -1,7 +1,7 @@
 "use dom";
 import React from "react";
-import AnimatedBackground from './AnimatedBackground';
-import styles from "./Landing.module.css";
+import AnimatedBackground from "@/components/ui/web/AnimatedBackground";
+import styles from "@/components/ui/Landing/Landing.module.css";
 
 type LandingProps = {
   onGoogleSignIn: () => void;

@@ -8,7 +8,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { router } from "expo-router";
 import React from "react";
 import { ActivityIndicator, Image, StyleSheet, Text, useColorScheme, View } from "react-native";
-import { IconSymbol } from "./IconSymbol";
+import { IconSymbol } from "@/components/ui/IconSymbol";
 
 type LandingProps = {
   onGoogleSignIn: () => void;
