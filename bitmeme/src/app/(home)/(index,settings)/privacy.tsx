@@ -1,5 +1,5 @@
 import React from "react";
-import PrivacyPolicy from "@/components/ui/web/privacy-dom";
+import PrivacyPolicy from "@/components/ui/web/PrivacyDom";
 import { Stack } from "expo-router";
 import Head from "expo-router/head";
 

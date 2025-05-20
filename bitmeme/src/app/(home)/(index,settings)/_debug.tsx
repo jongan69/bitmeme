@@ -1,5 +1,4 @@
 import React from "react";
-import "@/components/runtime/local-storage";
 
 import * as Form from "@/components/ui/Form";
 import Constants, { ExecutionEnvironment } from "expo-constants";

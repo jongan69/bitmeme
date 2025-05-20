@@ -64,5 +64,13 @@ const notifyWarning = (message: string) => {
     text2: message,
   });
 };
-export { notifyError, notifyInfo, notifySuccess, notifyTx, notifyWarning };
+
+const notifyLoading = (message: string) => {
+  Toast.show({
+    type: 'loading',
+    text1: 'Loading',
+    text2: message,
+  });
+};
+export { notifyError, notifyInfo, notifySuccess, notifyTx, notifyWarning, notifyLoading };
 

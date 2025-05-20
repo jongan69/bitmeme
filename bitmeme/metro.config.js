@@ -1,37 +1,27 @@
 // Learn more https://docs.expo.io/guides/customizing-metro
-const { getDefaultConfig } = require("@expo/metro-config");
+const { getDefaultConfig } = require('expo/metro-config');
 
-/** @type {import('@expo/metro-config').MetroConfig} */
-const config = getDefaultConfig(__dirname);
+module.exports = (() => {
+  const config = getDefaultConfig(__dirname);
 
-config.resolver.sourceExts.push("svg");
-config.resolver.assetExts = config.resolver.assetExts.filter(
-  (ext) => ext !== "svg"
-);
+  // Add polyfill resolvers
+  config.resolver.extraNodeModules = {
+    ...(config.resolver.extraNodeModules || {}),
+    crypto: require.resolve('expo-crypto'),
+  };
 
-// Polyfill resolvers (merge with any existing)
-config.resolver.extraNodeModules = {
-  ...(config.resolver.extraNodeModules || {}),
-  crypto: require.resolve('expo-crypto'),
-  Buffer: require.resolve('buffer/'),
-  url: require.resolve('react-native-url-polyfill'),
-  // http: require.resolve('stream-http'),
-  // https: require.resolve('https-browserify'),
-  // crypto: require.resolve('react-native-crypto'),
-  // stream: require.resolve('stream-browserify'),
-  // zlib: require.resolve('browserify-zlib'),
-  // util: require.resolve('util/'),
-  // assert: require.resolve('assert'),
-};
+  // Add SVG support
+  const { transformer, resolver } = config;
+  config.transformer = {
+    ...transformer,
+    babelTransformerPath: require.resolve('react-native-svg-transformer/expo'),
+  };
+  config.resolver = {
+    ...resolver,
+    assetExts: resolver.assetExts.filter((ext) => ext !== 'svg'),
+    sourceExts: [...resolver.sourceExts, 'svg'],
+    extraNodeModules: config.resolver.extraNodeModules,
+  };
 
-config.transformer.babelTransformerPath = require.resolve(
-  "./metro.transformer.js"
-);
-
-config.transformer.getTransformOptions = async () => ({
-  transform: {
-    experimentalImportSupport: true,
-  },
-});
-
-module.exports = config;
+  return config;
+})();

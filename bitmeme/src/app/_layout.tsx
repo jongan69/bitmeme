@@ -154,6 +154,16 @@ export default function Layout() {
                                 text2={props?.chain ? `Network: ${props.chain}` : ''}
                               />
                             ),
+                            loading: ({ props }) => (
+                              <BaseToast
+                                style={{ borderLeftColor: 'yellow' }}
+                                contentContainerStyle={{ backgroundColor: '#FFF0F0' }}
+                                text1="Loading..."
+                                text1Style={{ color: '#000000', fontWeight: 'bold' }}
+                                text2Style={{ color: '#000000' }}
+                                text2={props?.chain ? `Network: ${props.chain}` : ''}
+                              />
+                            ),
                           }}
                         />
                       </StacksProvider>

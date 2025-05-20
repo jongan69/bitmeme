@@ -12,7 +12,6 @@ import { wordlist } from '@scure/bip39/wordlists/english';
 import { Wallet } from "@stacks/wallet-sdk";
 import { HDKey } from "@scure/bip32";
 import { STACKS_TESTNET } from "@stacks/network";
-import { requestStxAirdrop } from "@/utils/requestStxAirdrop";
 import { setLocalStorage, getLocalStorage } from "@/utils/localStorage";
 import * as stacksTransactions from '@stacks/transactions';
 // import { c32address } from 'c32check';
@@ -30,7 +29,6 @@ type StacksContextType = {
     loadWalletFromLocalStorage: () => Promise<void>;
     tipUser: (recipient: string, amount: bigint, memo?: string) => Promise<void>;
     mintNFT: (metadataUri?: string) => Promise<void>;
-    requestStxAirdrop: (address: string) => Promise<void>;
 };
 
 const StacksContext = createContext<StacksContextType | undefined>(undefined);
@@ -40,8 +38,7 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
     const [wallet, setWallet] = useState<Wallet | null>(null);
     const [address, setAddress] = useState<string | null>(null);
     const [log, setLog] = useState("");
-    //   const network = STACKS_MAINNET; // Change to STACKS_TESTNET if needed
-    const network = STACKS_TESTNET;
+    const network = STACKS_TESTNET; // Change to STACKS_TESTNET if needed
     // 26 for TESTNET, 22 for MAINNET
     // const versionBytes = network === STACKS_TESTNET ? 26 : 22;
 
@@ -78,9 +75,6 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
             // console.log("versionBytes:", versionBytes);
             // const stxAddress = c32address(versionBytes, hash160Hex);
             // console.log("[DEBUG] stxAddress:", stxAddress);
-
-            await requestStxAirdrop(stxAddress);
-
             const wallet = {
                 accounts: [{ stxPrivateKey }],
             };
@@ -204,7 +198,6 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
                 loadWalletFromLocalStorage,
                 tipUser,
                 mintNFT,
-                requestStxAirdrop,
             }}
         >
             {children}

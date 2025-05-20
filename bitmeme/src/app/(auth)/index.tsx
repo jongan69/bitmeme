@@ -1,4 +1,4 @@
-import Landing from "@/components/ui/Landing/Landing";
+import Landing from "@/components/ui/Landing";
 import { useWalletOnboarding } from "@/hooks/useWallets";
 import { useWarmUpBrowser } from "@/hooks/useWarmUpBrowser";
 import { notifyError } from "@/utils/notification";
@@ -8,7 +8,7 @@ import * as AuthSession from "expo-auth-session";
 import * as Haptics from "expo-haptics";
 import { Href, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import React, { useEffect } from "react";
+import React from "react";
 import { Platform, ScrollView } from "react-native";
 
 // Handle any pending authentication sessions

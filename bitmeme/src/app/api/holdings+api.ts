@@ -42,6 +42,13 @@ export async function GET(request: Request) {
         body: body,
     });
         const holdings = await response.json();
+        console.log('holdings', holdings);
+
+        if (holdings.error) {
+            return new Response('Error fetching holdings: ' + JSON.stringify(holdings.error), {
+                status: 500,
+            });
+        }
         return Response.json({ holdings });
     } catch (error) {
         console.error("Error fetching holdings:", error);

@@ -1,4 +1,8 @@
+import "./local-storage";
+import 'react-native-url-polyfill/auto';
+
 import { getRandomValues as expoCryptoGetRandomValues } from "expo-crypto";
+
 // import pbkdf2 from "pbkdf2";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports

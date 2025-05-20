@@ -77,7 +77,7 @@ export function useHoldings(address: PublicKey) {
         return () => {
             isMounted = false;
         };
-    }, [address, network]);
+    }, [fetchHoldings]);
 
     return { holdings, loading, error, refetch: fetchHoldings, nativeBalance };
 }

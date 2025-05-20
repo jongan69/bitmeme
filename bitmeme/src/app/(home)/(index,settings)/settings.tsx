@@ -12,7 +12,7 @@ import * as AC from "@bacons/apple-colors";
 import { Image } from "expo-image";
 import { useNetworkState } from 'expo-network';
 import { router } from "expo-router";
-import React, { useState, useCallback, useMemo, memo } from "react";
+import React, { useState, useCallback, useMemo, memo, useEffect } from "react";
 import { Button, Switch, Text, View, KeyboardAvoidingView, Platform } from "react-native";
 import Animated, {
   interpolate,
@@ -22,7 +22,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { GlurryList } from "@/components/ui/glurry-modal";
-import { useSolanaWallet, WalletService } from "@/contexts/SolanaWalletProvider";
+import { useSolanaWallet } from "@/contexts/SolanaWalletProvider";
 import { useWalletOnboarding } from "@/hooks/useWallets";
 import TwitterSvg from "@/svg/twitter.svg";
 import { notifyError, notifySuccess } from "@/utils/notification";
@@ -35,6 +35,11 @@ import { useHoldings } from "@/hooks/misc/useHoldings";
 import { PublicKey } from "@solana/web3.js";
 import Icon from "@/components/ui/Icons";
 import TouchableBounce from "@/components/ui/TouchableBounce";
+import useBitcoinUTXOs from "@/hooks/ares/useBitcoinUTXOs";
+import { estimateMaxSpendableAmount } from "@/bitcoin";
+import useTwoWayPegConfiguration from "@/hooks/zpl/useTwoWayPegConfiguration";
+import { useMultiAirdrop } from "@/hooks/useMultiAirdrop";
+import { SolanaNetwork, BitcoinNetwork } from "@/types/store";
 
 function Switches({ autoTipOn, setAutoTipOn }: { autoTipOn: boolean; setAutoTipOn: (value: boolean) => void }) {
   return (
@@ -54,6 +59,7 @@ const BalancesSection = memo(function BalancesSection({
   isRefreshing,
   balance,
   nativeBalance,
+  spendableUTXOs,
   gravatarUri,
 }: {
   stacksAddress: string;
@@ -62,6 +68,7 @@ const BalancesSection = memo(function BalancesSection({
   isRefreshing: boolean;
   balance: any;
   nativeBalance: any;
+  spendableUTXOs: any;
   gravatarUri: string;
 }) {
   return (
@@ -83,9 +90,12 @@ const BalancesSection = memo(function BalancesSection({
             <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
               Your STX balance: {balance?.toString()}
             </Form.Text>
-            <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
-              Your SOL balance: {nativeBalance.lamports}
-            </Form.Text>
+              <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
+                Your SOL balance: {nativeBalance.lamports}
+              </Form.Text>
+              <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
+                Your BTC balance: {spendableUTXOs}
+              </Form.Text>
           </View>
           <TouchableBounce
             onPress={onRefresh}
@@ -134,18 +144,32 @@ export default function Page() {
   const { connection } = useSolanaWallet();
   const { solanaAddress, bitcoinAddress, stacksAddress } = useWalletOnboarding();
   const { data: balance, mutate, isValidating: isStacksValidating } = useStacksBalance(stacksAddress || "");
-  const holdingsResult = solanaAddress ? useHoldings(new PublicKey(solanaAddress)) : { nativeBalance: { lamports: 0 }, refetch: () => {}, loading: false };
+  const { feeRate } = useTwoWayPegConfiguration();
+
+  // Memoize gravatar URI
+  const gravatarUri = useMemo(
+    () => `https://www.gravatar.com/avatar/${bitcoinAddress || ''}?s=250`,
+    [bitcoinAddress]
+  );
+
+  // Memoize PublicKey to prevent infinite loop in useHoldings
+  const publicKey = useMemo(
+    () => (solanaAddress ? new PublicKey(solanaAddress) : null),
+    [solanaAddress]
+  );
+
+  // Use memoized publicKey in useHoldings
+  const holdingsResult = publicKey ? useHoldings(publicKey) : { nativeBalance: { lamports: 0 }, refetch: () => {}, loading: false };
   const nativeBalance = holdingsResult.nativeBalance;
   const refetchNativeBalance = holdingsResult.refetch;
   const isSolLoading = holdingsResult.loading;
-  // const { data: bitcoinUTXOs, mutate: refetchBitcoinUTXOs } = useBitcoinUTXOs(bitcoinAddress ?? null);
-  // const { feeRate } = useTwoWayPegConfiguration();
+  const { data: bitcoinUTXOs, mutate: refetchBitcoinUTXOs, isLoading: isBitcoinLoading } = useBitcoinUTXOs(bitcoinAddress ?? null);
 
-  // const [spendableUTXOs, setSpendableUTXOs] = useState(() => estimateMaxSpendableAmount(bitcoinUTXOs ?? [], feeRate));
+  const [spendableUTXOs, setSpendableUTXOs] = useState(() => estimateMaxSpendableAmount(bitcoinUTXOs ?? [], feeRate));
 
-  // useEffect(() => {
-  //   setSpendableUTXOs(estimateMaxSpendableAmount(bitcoinUTXOs ?? [], feeRate));
-  // }, [bitcoinUTXOs, feeRate]);
+  useEffect(() => {
+    setSpendableUTXOs(estimateMaxSpendableAmount(bitcoinUTXOs ?? [], feeRate));
+  }, [bitcoinUTXOs, feeRate]);
   
   const { signOut } = useClerk();
 
@@ -164,18 +188,34 @@ export default function Page() {
   const [showRpcStatus, setShowRpcStatus] = useState(false);
   const [show, setShow] = React.useState(false);
 
-  // Memoize gravatar URI
-  const gravatarUri = useMemo(
-    () => `https://www.gravatar.com/avatar/${bitcoinAddress || ''}?s=250`,
-    [bitcoinAddress]
-  );
+  // MultiAirdrop hook
+  const { requestAirdrops, results: airdropResults, loading: airdropLoading } = useMultiAirdrop();
 
-  // Only fetch balances when user requests
-  const handleShowBalances = useCallback(() => {
-    setShowBalances(true);
+  // Add this function:
+  const refreshBalances = useCallback(() => {
     mutate();
     refetchNativeBalance();
-  }, [mutate, refetchNativeBalance]);
+    refetchBitcoinUTXOs();
+  }, [mutate, refetchNativeBalance, refetchBitcoinUTXOs]);
+
+  // Change handleShowBalances to:
+  const handleShowBalances = useCallback(() => {
+    if (!showBalances) {
+      setShowBalances(true);
+      refreshBalances();
+    }
+  }, [showBalances, refreshBalances]);
+
+  // Airdrop handler
+  const handleAirdrop = async () => {
+    await requestAirdrops({
+      solanaAddresses: solanaAddress ? [solanaAddress] : [],
+      bitcoinAddresses: bitcoinAddress ? [bitcoinAddress] : [],
+      stxAddresses: stacksAddress ? [stacksAddress] : [],
+      solanaNetwork: SolanaNetwork.Devnet,
+      bitcoinNetwork: BitcoinNetwork.Regtest,
+    });
+  };
 
   // Only check RPC when user requests
   const checkRpcConnection = useCallback(async () => {
@@ -230,7 +270,7 @@ export default function Page() {
   });
 
   // Use validation/loading flags for spinner
-  const isRefreshingBalances = isStacksValidating || isSolLoading;
+  const isRefreshingBalances = isStacksValidating || isSolLoading || isBitcoinLoading;
 
   return (
     <KeyboardAvoidingView
@@ -311,13 +351,30 @@ export default function Page() {
             <BalancesSection
               stacksAddress={stacksAddress || ''}
               solanaAddress={solanaAddress || ''}
-              onRefresh={handleShowBalances}
+              onRefresh={refreshBalances}
               isRefreshing={isRefreshingBalances}
               balance={balance}
               nativeBalance={nativeBalance}
+              spendableUTXOs={spendableUTXOs}
               gravatarUri={gravatarUri}
             />
           )}
+          <Form.Section>
+            <Button
+              title={airdropLoading ? "Requesting Airdrops..." : "Request Airdrops"}
+              onPress={handleAirdrop}
+              disabled={airdropLoading}
+            />
+            {airdropResults.length > 0 && (
+              <View style={{ marginTop: 12 }}>
+                {airdropResults.map((result) => (
+                  <Text key={result.address + result.type}>
+                    {result.type.toUpperCase()} {result.address}: {result.status}
+                  </Text>
+                ))}
+              </View>
+            )}
+          </Form.Section>
           <Form.Section title="Data">
             <Form.Text
               onPress={() => {
