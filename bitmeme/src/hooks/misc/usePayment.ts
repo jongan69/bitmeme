@@ -139,10 +139,11 @@ export const useSolanaPayment = () => {
 
     const transferSOL = useCallback(
         async (amount: number, recipient: PublicKey) => {
-            console.log("[transferSOL] Called with amount:", amount, "recipient:", recipient?.toBase58());
+            const amountInLamports = Math.round(amount * Math.pow(10, SOL_DECIMALS));
+            console.log("[transferSOL] Called with amount:", amountInLamports, "recipient:", recipient?.toBase58(), "sender:", publicKey?.toBase58(), "amountInLamports:", amountInLamports);
             if (!publicKey) {
-                setError("Wallet not connected");
-                console.error("[transferSOL] Wallet not connected");
+                setError("Wallet not connected: " + publicKey);
+                console.error("[transferSOL] Wallet not connected: ", publicKey);
                 return;
             }
 
@@ -155,7 +156,7 @@ export const useSolanaPayment = () => {
                     SystemProgram.transfer({
                         fromPubkey: publicKey,
                         toPubkey: recipient,
-                        lamports: Math.round(amount * Math.pow(10, SOL_DECIMALS)) // Convert SOL to lamports
+                        lamports: amountInLamports // Convert SOL to lamports
                     })
                 );
                 console.log("[transferSOL] Transaction built:", transaction);

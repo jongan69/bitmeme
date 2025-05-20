@@ -2,6 +2,7 @@ import "./local-storage";
 import 'react-native-url-polyfill/auto';
 
 import { getRandomValues as expoCryptoGetRandomValues } from "expo-crypto";
+import { sha256 } from '@noble/hashes/sha2';
 
 // import pbkdf2 from "pbkdf2";
 
@@ -21,11 +22,21 @@ global.TextEncoder = require("text-encoding").TextEncoder;
 global.TextDecoder = require("text-encoding").TextDecoder;
 
 // --- Crypto polyfill for Clerk, Solana, Stacks, and Web ---
-class Crypto {
-    getRandomValues = expoCryptoGetRandomValues;
+class PolyfilledCrypto {
+  getRandomValues = expoCryptoGetRandomValues;
+  randomUUID = () => { throw new Error('randomUUID not implemented'); };
+  subtle = {
+    digest: async function (algorithm: string, data: ArrayBuffer) {
+      if (algorithm === 'SHA-256' || algorithm === 'SHA256') {
+        const hash = sha256(new Uint8Array(data));
+        return Uint8Array.from(hash).buffer;
+      }
+      throw new Error('Only SHA-256 is supported in this polyfill');
+    }
+  };
 }
 
-const webCrypto = typeof crypto !== "undefined" ? crypto : new Crypto();
+const webCrypto = typeof crypto !== "undefined" ? crypto : new PolyfilledCrypto();
 
 (() => {
     if (typeof crypto === "undefined") {
@@ -36,3 +47,7 @@ const webCrypto = typeof crypto !== "undefined" ? crypto : new Crypto();
         });
     }
 })();
+
+if (typeof global.crypto === 'undefined') {
+  global.crypto = new PolyfilledCrypto() as any;
+}

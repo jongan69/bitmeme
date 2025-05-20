@@ -27,6 +27,8 @@ export default function Page() {
       { translateY: interpolate(scroll.value, [-120, -70], [50, 0], "clamp") },
     ],
   }));
+  const { solanaAddress, bitcoinAddress, stacksAddress } = useWalletOnboarding();
+
   const { tipCurrency, tipAmount, autoTipOn } = useTipSettingsStore();
   const { transfer } = useSolanaPayment();
   const { sendBitcoin } = useBitcoinWallet();
@@ -54,6 +56,34 @@ export default function Page() {
   const [userId] = useUserIdAndNickname();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+
+  // --- Tip logic ---
+  const handleLikeAndTip = async (meme: any, hasLiked: boolean) => {
+    if (hasLiked) {
+      removeLike(meme.id);
+      return;
+    }
+    addLike(meme.id);
+    if (!autoTipOn) return;
+    try {
+      if (tipCurrency === "STX" && meme.stacksAddress) {
+        await tipUser(meme.stacksAddress, BigInt(tipAmount));
+        notifySuccess("Tipped with STX!");
+      } else if (tipCurrency === "SOL" && meme.solanaAddress) {
+        await transfer(Number(tipAmount), "SOL", new PublicKey(meme.solanaAddress));
+        notifySuccess("Tipped with SOL!");
+      } else if (tipCurrency === "BTC" && meme.bitcoinAddress) {
+        await sendBitcoin(meme.bitcoinAddress, Number(tipAmount));
+        notifySuccess("Tipped with BTC!");
+      } else {
+        notifyInfo("No address for selected tip currency.");
+        console.log("No address for selected tip currency: ", tipCurrency, meme.stacksAddress, meme.solanaAddress, meme.bitcoinAddress);
+      }
+    } catch (e: any) {
+      console.log("Tip failed: ", e);
+      notifyError("Tip failed: " + (e && (e.message || typeof e === 'string' ? e : JSON.stringify(e))));
+    }
+  };
 
   return (
     // @ts-ignore
@@ -97,33 +127,6 @@ export default function Page() {
             const memeComments = (Object.values(comments ?? {}) as Array<{ memeId: string; id?: string; text?: string }>).filter((comment) => comment.memeId === meme.id);
             const hasLiked = !!userId && memeLikes.some(like => like.userId === userId);
             const commentText = commentInputs[meme.id] || "";
-            // --- Tip logic ---
-            const handleLikeAndTip = async () => {
-              if (hasLiked) {
-                removeLike(meme.id);
-                return;
-              }
-              addLike(meme.id);
-              if (!autoTipOn) return;
-              try {
-                if (tipCurrency === "STX" && meme.stacksAddress) {
-                  await tipUser(meme.stacksAddress, BigInt(tipAmount));
-                  notifySuccess("Tipped with STX!");
-                } else if (tipCurrency === "SOL" && meme.solanaAddress) {
-                  await transfer(Number(tipAmount), "SOL", new PublicKey(meme.solanaAddress));
-                  notifySuccess("Tipped with SOL!");
-                } else if (tipCurrency === "BTC" && meme.bitcoinAddress) {
-                  await sendBitcoin(meme.bitcoinAddress, Number(tipAmount));
-                  notifySuccess("Tipped with BTC!");
-                } else {
-                  notifyInfo("No address for selected tip currency.");
-                  console.log("No address for selected tip currency: ", tipCurrency, meme.stacksAddress, meme.solanaAddress, meme.bitcoinAddress);
-                }
-              } catch (e: any) {
-                notifyError("Tip failed: " + (e && (e.message || typeof e === 'string' ? e : JSON.stringify(e))));
-              }
-            };
-
             return (
               <View
                 key={meme.id}
@@ -158,7 +161,7 @@ export default function Page() {
                 </Text>
                 <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
                   <TouchableOpacity
-                    onPress={handleLikeAndTip}
+                    onPress={() => handleLikeAndTip(meme, hasLiked)}
                     style={{
                       flexDirection: "row",
                       alignItems: "center",

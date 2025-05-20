@@ -125,6 +125,10 @@ export default function MemeGenerator() {
 
   const handlePost = async (url: string, caption: string) => {
     setPosting(true);
+    console.log("Posting meme: ", url, caption);
+    console.log("Solana address: ", solanaAddress);
+    console.log("Bitcoin address: ", bitcoinAddress);
+    console.log("Stacks address: ", stacksAddress);
     try {
       await mintNftWithImageUrl(url);
       addMeme({

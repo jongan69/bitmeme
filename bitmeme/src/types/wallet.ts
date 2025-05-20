@@ -23,6 +23,11 @@ export interface BitcoinWallet {
   p2wpkh?: string;
   tweakSigner?: bitcoin.Signer;
   signer?: bitcoin.Signer;
+  nobleTaprootSigner?: {
+    publicKey: Buffer;
+    signSchnorr: (hash: Buffer) => Promise<Buffer>;
+    sign: (hash: Buffer) => Promise<Buffer>;
+  };
 }
 
 export enum EventName {

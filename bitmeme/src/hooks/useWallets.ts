@@ -5,9 +5,8 @@ import { notifyError, notifySuccess } from "@/utils/notification";
 import { useEffect, useState } from "react";
 import { useStacks } from "@/contexts/StacksWalletProvider";
 
-
 export function useWalletOnboarding(onReady?: () => void) {
-    const { connectDerivedWallet, wallet: bitcoinWallet } = useBitcoinWallet();
+    const { connectConnectorWallet, connectors, connectDerivedWallet, wallet: bitcoinWallet } = useBitcoinWallet();
     const { login, publicKey } = useSolanaWallet();
     const { address: stacksAddress, loadWalletFromLocalStorage } = useStacks();
     const [loading, setLoading] = useState(true);
@@ -16,6 +15,7 @@ export function useWalletOnboarding(onReady?: () => void) {
     // Step 1: Load or create Solana wallet
     useEffect(() => {
         const doLogin = async () => {
+            console.log('[useWalletOnboarding] doLogin');
             setLoading(true);
             setError(null);
             try {
