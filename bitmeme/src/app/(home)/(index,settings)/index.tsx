@@ -1,21 +1,20 @@
+import React from "react";
+import { Image, Text, View, TouchableOpacity, TextInput, useColorScheme } from "react-native";
 import * as Form from "@/components/ui/Form";
 import Stack from "@/components/ui/Stack";
 import * as AC from "@bacons/apple-colors";
-import React from "react";
-import { Image, Text, View, TouchableOpacity, TextInput, ScrollView, useColorScheme } from "react-native";
-import Animated, {
-  interpolate,
-  useAnimatedRef,
-  useAnimatedStyle,
-  useScrollViewOffset,
-} from "react-native-reanimated";
+import Animated, { interpolate, useAnimatedRef, useAnimatedStyle, useScrollViewOffset } from "react-native-reanimated";
+
+// Hooks
+import { useWalletOnboarding } from "@/hooks/useWallets";
+import { useSolanaPayment } from "@/hooks/misc/usePayment";
+import { useBitcoinWallet } from "@/contexts/BitcoinWalletProvider";
 import { useTable, useAddLikeCallback, useRemoveLikeCallback, useAddCommentCallback } from "@/stores/Memestore";
 import { useUserIdAndNickname } from "@/hooks/useNickname";
 import { useStacks } from "@/contexts/StacksWalletProvider";
-import { useBitcoinWallet } from "@/contexts/BitcoinWalletProvider";
-import { useSolanaPayment } from "@/hooks/misc/usePayment";
 import { useTipSettingsStore } from "@/stores/tipSettingsStore";
-import { useWalletOnboarding } from "@/hooks/useWallets";
+
+// Utils
 import { notifySuccess, notifyError, notifyInfo } from "@/utils/notification";
 import { PublicKey } from "@solana/web3.js";
 
@@ -65,6 +64,10 @@ export default function Page() {
     }
     addLike(meme.id);
     if (!autoTipOn) return;
+    if (!solanaAddress && !bitcoinAddress && !stacksAddress) {
+      notifyError("No wallet address found");
+      return;
+    }
     try {
       if (tipCurrency === "STX" && meme.stacksAddress) {
         await tipUser(meme.stacksAddress, BigInt(tipAmount));

@@ -1,12 +1,20 @@
+import * as React from "react";
+import * as Haptics from "expo-haptics";
+
+// Components
 import { BodyScrollView } from "@/components/ui/BodyScrollView";
 import { TextInput } from "@/components/ui/TextInput";
 import { ThemedButton, ThemedText } from "@/components/ui/themed";
+
+// Hooks and Utils
 import { notifySuccess } from "@/utils/notification";
 import { isClerkAPIResponseError, useSignUp } from "@clerk/clerk-expo";
-import { ClerkAPIError } from "@clerk/types";
-import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
-import * as React from "react";
+
+// Types
+import { ClerkAPIError } from "@clerk/types";
+
+
 
 export default function SignUpScreen() {
   const { isLoaded, signUp, setActive } = useSignUp();

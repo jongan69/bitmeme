@@ -1,12 +1,19 @@
-import * as Form from "@/components/ui/Form";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import { useSolanaWallet } from "@/contexts/SolanaWalletProvider";
-import * as AC from "@bacons/apple-colors";
-import { useUser } from "@clerk/clerk-expo";
-import * as Application from "expo-application";
-import * as Clipboard from 'expo-clipboard';
 import * as React from "react";
 import { Animated, Image, Platform, View } from "react-native";
+import * as Application from "expo-application";
+import * as Clipboard from 'expo-clipboard';
+
+// Components
+import * as Form from "@/components/ui/Form";
+import { IconSymbol } from "@/components/ui/IconSymbol";
+import * as AC from "@bacons/apple-colors";
+
+// Hooks
+import { useSolanaWallet } from "@/contexts/SolanaWalletProvider";
+import { useUser } from "@clerk/clerk-expo";
+
+
+
 
 export default function Page() {
   const { exportPrivateKey } = useSolanaWallet();

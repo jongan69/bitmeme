@@ -1,7 +1,11 @@
+import { Redirect } from "expo-router";
+
+// Components
 import * as Form from "@/components/ui/Form";
 import Stack from "@/components/ui/Stack";
+
+// Hooks
 import { useAuth } from "@clerk/clerk-expo";
-import { Redirect } from "expo-router";
 
 export default function AuthRoutesLayout() {
     const { isLoaded, isSignedIn } = useAuth();

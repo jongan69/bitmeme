@@ -1,3 +1,18 @@
+import React, { useState, useCallback, useMemo, memo } from "react";
+import { Button, Switch, Text, View, KeyboardAvoidingView, Platform } from "react-native";
+import { Image } from "expo-image";
+import { useNetworkState } from 'expo-network';
+import { router } from "expo-router";
+import * as Network from 'expo-network';
+import * as AC from "@bacons/apple-colors";
+import Animated, {
+  interpolate,
+  useAnimatedRef,
+  useAnimatedStyle,
+  useScrollViewOffset,
+} from "react-native-reanimated";
+
+// Components
 import { ContentUnavailable } from "@/components/ui/ContentUnavailable";
 import * as Form from "@/components/ui/Form";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -8,39 +23,30 @@ import {
   SegmentsTrigger,
 } from "@/components/ui/Segments";
 import Stack from "@/components/ui/Stack";
-import * as AC from "@bacons/apple-colors";
-import { Image } from "expo-image";
-import { useNetworkState } from 'expo-network';
-import { router } from "expo-router";
-import React, { useState, useCallback, useMemo, memo, useEffect } from "react";
-import { Button, Switch, Text, View, KeyboardAvoidingView, Platform } from "react-native";
-import Animated, {
-  interpolate,
-  useAnimatedRef,
-  useAnimatedStyle,
-  useScrollViewOffset,
-} from "react-native-reanimated";
-
 import { GlurryList } from "@/components/ui/glurry-modal";
+import TextInput from "@/components/ui/TextInput";
+import TouchableBounce from "@/components/ui/TouchableBounce";
+
+// Hooks
 import { useSolanaWallet } from "@/contexts/SolanaWalletProvider";
 import { useWalletOnboarding } from "@/hooks/useWallets";
-import TwitterSvg from "@/svg/twitter.svg";
-import { notifyError, notifySuccess } from "@/utils/notification";
 import { useClerk } from "@clerk/clerk-expo";
-import * as Network from 'expo-network';
 import useStacksBalance from "@/hooks/misc/useStacksBalance";
-import TextInput from "@/components/ui/TextInput";
 import { useTipSettingsStore } from "@/stores/tipSettingsStore";
 import { useHoldings } from "@/hooks/misc/useHoldings";
-import { PublicKey } from "@solana/web3.js";
-import Icon from "@/components/ui/Icons";
-import TouchableBounce from "@/components/ui/TouchableBounce";
-// import useBitcoinUTXOs from "@/hooks/ares/useBitcoinUTXOs";
-import { estimateMaxSpendableAmount } from "@/bitcoin";
-import useTwoWayPegConfiguration from "@/hooks/zpl/useTwoWayPegConfiguration";
 import { useMultiAirdrop } from "@/hooks/useMultiAirdrop";
-import { SolanaNetwork, BitcoinNetwork } from "@/types/store";
 import { useBtcBalanceSats } from "@/hooks/misc/useBtcBalanceSats";
+
+// Icons and SVGs
+import Icon from "@/components/ui/Icons";
+import TwitterSvg from "@/svg/twitter.svg";
+
+// Utils
+import { notifyError, notifySuccess } from "@/utils/notification";
+import { PublicKey } from "@solana/web3.js";
+
+// Types
+import { SolanaNetwork, BitcoinNetwork } from "@/types/store";
 
 function Switches({ autoTipOn, setAutoTipOn }: { autoTipOn: boolean; setAutoTipOn: (value: boolean) => void }) {
   return (
@@ -145,7 +151,6 @@ export default function Page() {
   const { connection } = useSolanaWallet();
   const { solanaAddress, bitcoinAddress, stacksAddress } = useWalletOnboarding();
   const { data: balance, mutate, isValidating: isStacksValidating } = useStacksBalance(stacksAddress || "");
-  const { feeRate } = useTwoWayPegConfiguration();
 
   // Memoize gravatar URI
   const gravatarUri = useMemo(

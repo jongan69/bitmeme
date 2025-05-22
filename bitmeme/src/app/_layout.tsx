@@ -1,7 +1,6 @@
 import { Suspense, useEffect } from "react";
 import { StatusBar, useColorScheme } from "react-native";
 import { Slot, SplashScreen } from "expo-router";
-
 import {
   DarkTheme,
   DefaultTheme,
@@ -12,10 +11,12 @@ import { SystemBars } from "react-native-edge-to-edge";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Toast, { BaseToast } from 'react-native-toast-message';
 
+// Components
 import { AsyncFont } from "@/components/data/async-font";
 import { tokenCache } from "@/stores/local/cache";
 import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";
 
+// Contexts
 import { BitcoinWalletProvider } from '@/contexts/BitcoinWalletProvider';
 import { SolanaWalletProvider } from '@/contexts/SolanaWalletProvider';
 import { ZplClientProvider } from '@/contexts/ZplClientProvider';

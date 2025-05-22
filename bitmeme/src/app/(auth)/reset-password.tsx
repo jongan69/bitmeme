@@ -1,9 +1,15 @@
 import * as React from "react";
-import { useRouter } from "expo-router";
+
+// Components
 import { ThemedText, ThemedButton } from "@/components/ui/themed";
 import { BodyScrollView } from "@/components/ui/BodyScrollView";
 import { TextInput } from "@/components/ui/TextInput";
+
+// Hooks and Utils
+import { useRouter } from "expo-router";
 import { isClerkAPIResponseError, useSignIn } from "@clerk/clerk-expo";
+
+// Types
 import { ClerkAPIError } from "@clerk/types";
 
 export default function ResetPassword() {

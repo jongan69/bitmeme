@@ -1,10 +1,13 @@
+import { useMemo } from "react";
+import { Image, View } from "react-native";
+
+// Components
 import Stack from "@/components/ui/Stack";
 import * as AC from "@bacons/apple-colors";
-import { Image, Text, View } from "react-native";
-
 import * as Form from "@/components/ui/Form";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import { useMemo } from "react";
+
+// Hooks
 import { useUser } from "@clerk/clerk-expo";
 
 export const unstable_settings = {

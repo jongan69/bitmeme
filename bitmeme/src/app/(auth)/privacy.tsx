@@ -1,7 +1,9 @@
-import { BodyScrollView } from "@/components/ui/BodyScrollView";
-import { ThemedText } from "@/components/ui/themed";
 import React from "react";
 import { StyleSheet, View } from "react-native";
+
+// Components
+import { BodyScrollView } from "@/components/ui/BodyScrollView";
+import { ThemedText } from "@/components/ui/themed";
 
 export default function PrivacyPolicy() {
   return (

@@ -1,15 +1,20 @@
-import { BodyScrollView } from "@/components/ui/BodyScrollView";
-import { TextInput } from "@/components/ui/TextInput";
-import { ThemedButton, ThemedText } from "@/components/ui/themed";
-import { useWarmUpBrowser } from "@/hooks/useWarmUpBrowser";
-import { notifyError, notifySuccess } from "@/utils/notification";
-import { isClerkAPIResponseError, useSignIn, useSSO } from "@clerk/clerk-expo";
-import { ClerkAPIError } from "@clerk/types";
+import React from "react";
+import { StyleSheet, View } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import React from "react";
-import { StyleSheet, View } from "react-native";
+
+// Components
+import { BodyScrollView } from "@/components/ui/BodyScrollView";
+import { TextInput } from "@/components/ui/TextInput";
+import { ThemedButton, ThemedText } from "@/components/ui/themed";
+
+// Hooks and Utils
+import { useWarmUpBrowser } from "@/hooks/useWarmUpBrowser";
+import { isClerkAPIResponseError, useSignIn, useSSO } from "@clerk/clerk-expo";
+import { notifyError, notifySuccess } from "@/utils/notification";
+// Types
+import { ClerkAPIError } from "@clerk/types";
 
 // Handle any pending authentication sessions
 WebBrowser.maybeCompleteAuthSession();

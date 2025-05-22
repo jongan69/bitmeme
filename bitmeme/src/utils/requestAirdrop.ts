@@ -43,5 +43,6 @@ export async function requestBtcAirdrop({
   bitcoinNetwork: BitcoinNetwork;
   claimAmountLimit?: number;
 }): Promise<"success" | "limit-reached" | "error"> {
+  notifyError("Testnet Bitcoin airdrop does not have an API");
   return "success";
 }

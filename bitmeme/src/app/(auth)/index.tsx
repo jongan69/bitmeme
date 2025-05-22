@@ -1,21 +1,27 @@
-import Landing from "@/components/ui/Landing";
-import { useWalletOnboarding } from "@/hooks/useWallets";
-import { useWarmUpBrowser } from "@/hooks/useWarmUpBrowser";
-import { notifyError } from "@/utils/notification";
-import { isClerkAPIResponseError, useAuth, useSSO } from "@clerk/clerk-expo";
-import { ClerkAPIError } from "@clerk/types";
+import React from "react";
+import { Platform, ScrollView } from "react-native";
 import * as AuthSession from "expo-auth-session";
 import * as Haptics from "expo-haptics";
 import { Href, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import React from "react";
-import { Platform, ScrollView } from "react-native";
+
+// Components
+import Landing from "@/components/ui/Landing";
+
+// Hooks and Utils
+import { useWalletOnboarding } from "@/hooks/useWallets";
+import { useWarmUpBrowser } from "@/hooks/useWarmUpBrowser";
+import { notifyError } from "@/utils/notification";
+import { isClerkAPIResponseError, useAuth, useSSO } from "@clerk/clerk-expo";
+
+// Types
+import { ClerkAPIError } from "@clerk/types";
 
 // Handle any pending authentication sessions
 WebBrowser.maybeCompleteAuthSession();
 
 export default function SignIn() {
-  const [errors, setErrors] = React.useState<ClerkAPIError[]>([]);
+  const [, setErrors] = React.useState<ClerkAPIError[]>([]);
   useWarmUpBrowser();
   const { startSSOFlow } = useSSO();
   const router = useRouter();
