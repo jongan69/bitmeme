@@ -138,8 +138,8 @@ export const useSolanaPayment = () => {
     );
 
     const transferSOL = useCallback(
-        async (amount: number, recipient: PublicKey) => {
-            const amountInLamports = Math.round(amount * Math.pow(10, SOL_DECIMALS));
+        async (amount: number, recipient: PublicKey, isLamports: boolean = false) => {
+            const amountInLamports = isLamports ? amount : Math.round(amount * Math.pow(10, SOL_DECIMALS));
             console.log("[transferSOL] Called with amount:", amountInLamports, "recipient:", recipient?.toBase58(), "sender:", publicKey?.toBase58(), "amountInLamports:", amountInLamports);
             if (!publicKey) {
                 setError("Wallet not connected: " + publicKey);
@@ -189,7 +189,7 @@ export const useSolanaPayment = () => {
 
 
     const transfer = useCallback(
-        async (amount: number, currency: PaymentCurrency, recipient: PublicKey) => {
+        async (amount: number, currency: PaymentCurrency, recipient: PublicKey, isLamports: boolean = false) => {
             console.log("[transfer] Called with amount:", amount, "currency:", currency, "recipient:", recipient?.toBase58());
             if (network !== 'devnet') {
                 switch (currency) {
@@ -202,7 +202,7 @@ export const useSolanaPayment = () => {
                         }
                         const solAmount = amount / priceSol.data[SOL_MINT].price;
                         console.log("[transfer] Calculated solAmount:", solAmount);
-                        return transferSOL(solAmount, recipient);
+                        return transferSOL(solAmount, recipient, isLamports);
                     case 'USDC':
                         return transferUSDC(amount, recipient);
                     default:
@@ -212,7 +212,7 @@ export const useSolanaPayment = () => {
             } else {
                 switch (currency) {
                     case 'SOL':
-                        return transferSOL(amount, recipient);
+                        return transferSOL(amount, recipient, isLamports);
                     case 'USDC':
                         return transferUSDC(amount, recipient);
                     default:

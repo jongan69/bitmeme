@@ -1,14 +1,3 @@
-export const MODAL_NAMES = {
-  WALLET_SELECTOR: "walletSelector",
-  ADD_NEW_WALLET: "addNewWallet",
-  DEV_INFO_MODAL: "devInfoModal",
-  ENDPOINT_SELECTOR: "endpointSelector",
-  USER_SETTINGS: "userSettings",
-  MOBILE_MENU: "mobileMenu",
-  SUCCESSFUL_CLAIM: "successfulClaim",
-  RECONNECT_MODAL: "reconnectModal",
-};
-
 export const ZEUS_SCAN_URL = process.env.EXPO_PUBLIC_ZEUS_SCAN_URL ?? "";
 
 export const BTC_DECIMALS = 8;

@@ -9,21 +9,15 @@ export enum BitcoinNetwork {
   Mainnet = "mainnet",
 }
 
+export enum StacksNetwork {
+  Testnet = "testnet",
+  Mainnet = "mainnet",
+}
+
 export enum SolanaRpcProvider {
   Zeus,
   Custom,
 }
-
-export type StoreStates = {
-  currentModal: string | null;
-  isGlobalLoaderOpen: boolean;
-};
-
-export type StoreActions = {
-  openModalByName: (name: string) => void;
-  closeModal: () => void;
-  setIsGlobalLoaderOpen: (isOpen: boolean) => void;
-};
 
 export type PersistentState = {
   solanaNetwork: SolanaNetwork;

@@ -26,12 +26,12 @@ export const broadcastRawTx = async (
     });
     console.log('[broadcastRawTxViaBlockstream] Response:', res);
     if (!res.ok) {
-      const errText = await res.text();
+      const errText = await res.json();
       throw new Error(`Broadcast failed: ${errText}`);
     }
-    const txid = await res.text();
-    console.log('[broadcastRawTxViaBlockstream] Transaction ID:', txid);
-    return txid.trim();
+    const txid = await res.json();
+    console.log('[broadcastRawTxViaBlockstream] Transaction ID:', txid.result);
+    return txid.result.trim();
   } catch (error) {
     console.error('[broadcastRawTxViaBlockstream] Error:', error);
     throw error;

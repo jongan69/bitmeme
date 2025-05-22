@@ -14,6 +14,7 @@ import { HDKey } from "@scure/bip32";
 import { STACKS_TESTNET } from "@stacks/network";
 import { setLocalStorage, getLocalStorage } from "@/utils/localStorage";
 import * as stacksTransactions from '@stacks/transactions';
+import { notifyError } from "@/utils/notification";
 // import { c32address } from 'c32check';
 // import { getPublicKey as nobleGetPublicKey } from '@noble/secp256k1';
 // import { ripemd160 } from '@noble/hashes/legacy';
@@ -27,8 +28,8 @@ type StacksContextType = {
     SignTx: (recipient: string, amount: bigint, memo: string) => Promise<void>;
     generateStxWallet: () => Promise<void>;
     loadWalletFromLocalStorage: () => Promise<void>;
-    tipUser: (recipient: string, amount: bigint, memo?: string) => Promise<void>;
-    mintNFT: (metadataUri?: string) => Promise<void>;
+    tipUser: (recipient: string, amount: bigint, memo?: string) => Promise<string | undefined>;
+    mintNFT: (metadataUri?: string) => Promise<string | undefined>;
 };
 
 const StacksContext = createContext<StacksContextType | undefined>(undefined);
@@ -139,9 +140,20 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
                 network,
                 memo,
             };
+            console.log("tipUser txOptions", txOptions);
             const transaction = await makeSTXTokenTransfer(txOptions);
+            console.log("tipUser transaction", transaction);
             const response = await broadcastTransaction({ transaction, network });
-            setLog(`Tipped ${amount} microSTX to ${recipient}. TxID: ${response.txid}`);
+            console.log("tipUser broadcast response", response);
+            if ("error" in response) {
+                console.log("tipUser error", response.reason);
+                notifyError(`Tipping failed: ${response.reason}`);
+
+                return undefined;
+            } else {
+                setLog(`Tipped ${amount} microSTX to ${recipient}. TxID: ${response.txid}`);
+                return response.txid;
+            }
         } catch (err: any) {
             setLog(`Tip Stacks error: ${err.message || err}`);
         }
@@ -173,6 +185,7 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
             const response = await broadcastTransaction({ transaction, network });
             console.log("mintNFT broadcast response", response);
             setLog(`NFT mint transaction sent! TxID: ${response.txid}`);
+            return response.txid;
         } catch (err: any) {
             console.error("NFT mint error:", err);
             setLog(`NFT mint error: ${err.message || err}`);

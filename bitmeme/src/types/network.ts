@@ -1,6 +1,7 @@
 export enum Chain {
   Solana = "Solana",
   Bitcoin = "Bitcoin",
+  Stacks = "Stacks",
 }
 
 export interface NetworkConfig {

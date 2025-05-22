@@ -97,12 +97,12 @@ const BalancesSection = memo(function BalancesSection({
             <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
               STX balance: {balance?.toString()} STX
             </Form.Text>
-              <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
-                SOL balance: {nativeBalance.lamports} Lamports
-              </Form.Text>
-              <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
-                BTC balance: {spendableUTXOs} sats
-              </Form.Text>
+            <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
+              SOL balance: {nativeBalance.lamports} Lamports
+            </Form.Text>
+            <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
+              BTC balance: {spendableUTXOs} sats
+            </Form.Text>
           </View>
           <TouchableBounce
             onPress={onRefresh}
@@ -165,7 +165,7 @@ export default function Page() {
   );
 
   // Use memoized publicKey in useHoldings
-  const holdingsResult = publicKey ? useHoldings(publicKey) : { nativeBalance: { lamports: 0 }, refetch: () => {}, loading: false };
+  const holdingsResult = publicKey ? useHoldings(publicKey) : { nativeBalance: { lamports: 0 }, refetch: () => { }, loading: false };
   const { balance: btcBalance, loading: btcLoading, error: btcError, refresh: btcRefresh } = useBtcBalanceSats(bitcoinAddress ?? null, BitcoinNetwork.Testnet);
   const nativeBalance = holdingsResult.nativeBalance;
   const refetchNativeBalance = holdingsResult.refetch;
@@ -177,7 +177,7 @@ export default function Page() {
   // useEffect(() => {
   //   setSpendableUTXOs(estimateMaxSpendableAmount(bitcoinUTXOs ?? [], feeRate));
   // }, [bitcoinUTXOs, feeRate]);
-  
+
   const { signOut } = useClerk();
 
   const networkState = useNetworkState();
@@ -261,7 +261,7 @@ export default function Page() {
       const state = await Network.getNetworkStateAsync();
       setManualNetworkState(state);
     } catch (e) {
-      // Optionally handle error
+      notifyError(`Failed to refresh network state: ${String(e)}`);
     }
   };
 
@@ -409,6 +409,7 @@ export default function Page() {
                 <SegmentsTrigger value="SOL">SOL</SegmentsTrigger>
                 <SegmentsTrigger value="BTC">BTC</SegmentsTrigger>
               </SegmentsList>
+              {/* <Form.Text>Tip Amount in {tipCurrency === "STX" ? "STX" : tipCurrency === "SOL" ? "Lamports" : "sats"}</Form.Text> */}
               <SegmentsContent value="STX">
                 <Form.Text>STX selected</Form.Text>
                 <TextInput
@@ -416,7 +417,7 @@ export default function Page() {
                   value={tipAmount}
                   onChangeText={setTipAmount}
                   placeholder="Enter micro-payment amount"
-                  label="Amount (in micro-payments)"
+                  label="Amount (in STX)"
                 />
               </SegmentsContent>
               <SegmentsContent value="SOL">
@@ -426,7 +427,7 @@ export default function Page() {
                   value={tipAmount}
                   onChangeText={setTipAmount}
                   placeholder="Enter micro-payment amount"
-                  label="Amount (in micro-payments)"
+                  label="Amount (in Lamports)"
                 />
               </SegmentsContent>
               <SegmentsContent value="BTC">
@@ -436,7 +437,7 @@ export default function Page() {
                   value={tipAmount}
                   onChangeText={setTipAmount}
                   placeholder="Enter micro-payment amount"
-                  label="Amount (in micro-payments)"
+                  label="Amount (in sats)"
                 />
               </SegmentsContent>
             </Segments>
@@ -458,9 +459,9 @@ export default function Page() {
               />
             )}
             {/* Show RPC Status Button and Section */}
-            <Form.Section>
-              <Button title="Check RPC Status" onPress={checkRpcConnection} disabled={rpcChecking} />
-            </Form.Section>
+
+            {!rpcChecking && !rpcConnected && <Button title="Check RPC Status" onPress={checkRpcConnection} disabled={rpcChecking} />}
+
             {showRpcStatus && (
               <RpcStatusSection
                 rpcConnected={rpcConnected}

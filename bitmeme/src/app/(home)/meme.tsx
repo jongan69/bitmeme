@@ -4,7 +4,10 @@ import TouchableBounce from "@/components/ui/TouchableBounce";
 import { useMintNftWithImageUrl } from "@/hooks/useMintNft";
 import { useWalletOnboarding } from "@/hooks/useWallets";
 import { useAddMemeCallback } from "@/stores/Memestore";
-import { notifyError, notifySuccess } from "@/utils/notification";
+import { InteractionType } from "@/types/api";
+import { Chain } from "@/types/network";
+import { StacksNetwork } from "@/types/store";
+import { notifyError, notifySuccess, notifyTx } from "@/utils/notification";
 import Constants from "expo-constants";
 import { fetch } from "expo/fetch";
 import React, { useState } from "react";
@@ -130,15 +133,17 @@ export default function MemeGenerator() {
     console.log("Bitcoin address: ", bitcoinAddress);
     console.log("Stacks address: ", stacksAddress);
     try {
-      await mintNftWithImageUrl(url);
+      const txid = await mintNftWithImageUrl(url);
+      console.log("Minted NFT with txid: ", txid);
       addMeme({
         caption,
         postUrl: url,
-        solanaAddress: solanaAddress || "",
-        bitcoinAddress: bitcoinAddress || "",
-        stacksAddress: stacksAddress || "",
+        solanaAddress: solanaAddress!,
+        bitcoinAddress: bitcoinAddress!,
+        stacksAddress: stacksAddress!,
       });
-      notifySuccess("Meme minted on STX!\nCaption: " + caption);
+      notifyTx(true, { chain: Chain.Stacks, type: InteractionType.MintNFT, txId: txid, network: StacksNetwork.Testnet });
+      // notifySuccess("Meme minted on STX!\nCaption: " + caption);
       setSelectedMeme(null);
       setCaption("");
     } catch (err) {

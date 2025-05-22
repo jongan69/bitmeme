@@ -15,7 +15,7 @@ export function useWalletOnboarding(onReady?: () => void) {
     // Step 1: Load or create Solana wallet
     useEffect(() => {
         const doLogin = async () => {
-            console.log('[useWalletOnboarding] doLogin');
+            console.log('[useWalletOnboarding] Logging in to Wallets');
             setLoading(true);
             setError(null);
             try {

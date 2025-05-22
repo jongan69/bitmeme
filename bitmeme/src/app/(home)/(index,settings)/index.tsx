@@ -15,8 +15,11 @@ import { useStacks } from "@/contexts/StacksWalletProvider";
 import { useTipSettingsStore } from "@/stores/tipSettingsStore";
 
 // Utils
-import { notifySuccess, notifyError, notifyInfo } from "@/utils/notification";
+import { notifyError, notifyInfo, notifyTx } from "@/utils/notification";
 import { PublicKey } from "@solana/web3.js";
+import { InteractionType } from "@/types/api";
+import { Chain } from "@/types/network";
+import { BitcoinNetwork, SolanaNetwork, StacksNetwork } from "@/types/store";
 
 export default function Page() {
   const ref = useAnimatedRef();
@@ -70,11 +73,15 @@ export default function Page() {
     }
     try {
       if (tipCurrency === "STX" && meme.stacksAddress) {
-        await tipUser(meme.stacksAddress, BigInt(tipAmount));
-        notifySuccess("Tipped with STX!");
+        const txid = await tipUser(meme.stacksAddress, BigInt(tipAmount));
+        if (txid) {
+          notifyTx(true, { chain: Chain.Stacks, type: InteractionType.Tip, txId: txid, network: StacksNetwork.Testnet });
+        }
       } else if (tipCurrency === "SOL" && meme.solanaAddress) {
-        await transfer(Number(tipAmount), "SOL", new PublicKey(meme.solanaAddress));
-        notifySuccess("Tipped with SOL!");
+        const txid = await transfer(Number(tipAmount), "SOL", new PublicKey(meme.solanaAddress), true);
+        if (txid) {
+          notifyTx(true, { chain: Chain.Solana, type: InteractionType.Tip, txId: txid, network: SolanaNetwork.Devnet });
+        }
       } else if (tipCurrency === "BTC" && meme.bitcoinAddress) {
         const DUST_THRESHOLD = 330;
         const tipNum = Number(tipAmount);
@@ -83,8 +90,10 @@ export default function Page() {
           notifyError(`Tip amount must be a number and at least ${DUST_THRESHOLD} sats (dust threshold)`);
           return;
         }
-        await sendBitcoin(meme.bitcoinAddress, tipNum);
-        notifySuccess("Tipped with BTC!");
+        const txid = await sendBitcoin(meme.bitcoinAddress, tipNum);
+        if (txid) {
+          notifyTx(true, { chain: Chain.Bitcoin, type: InteractionType.Tip, txId: txid, network: BitcoinNetwork.Testnet });
+        }
       } else {
         notifyInfo("No address for selected tip currency.");
         console.log("No address for selected tip currency: ", tipCurrency, meme.stacksAddress, meme.solanaAddress, meme.bitcoinAddress);
@@ -133,6 +142,7 @@ export default function Page() {
       {memeList.length > 0 && (
         <View style={{ backgroundColor: isDark ? "#18181b" : "#f6f6f6", gap: 12, alignSelf: "center", justifyContent: "center", width: "100%" }}>
           {memeList.map((meme) => {
+            // console.log("meme: ", meme);
             const memeLikes = (Object.values(likes ?? {}) as Array<{ memeId: string; userId: string }>).filter((like) => like.memeId === meme.id);
             const memeComments = (Object.values(comments ?? {}) as Array<{ memeId: string; id?: string; text?: string }>).filter((comment) => comment.memeId === meme.id);
             const hasLiked = !!userId && memeLikes.some(like => like.userId === userId);

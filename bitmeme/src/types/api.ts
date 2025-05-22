@@ -82,6 +82,8 @@ export enum InteractionStatus {
 export enum InteractionType {
   Deposit = 0,
   Withdrawal = 1,
+  MintNFT = 2,
+  Tip = 3,
 }
 
 export const interactionSchema = z.object({

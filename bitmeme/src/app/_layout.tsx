@@ -10,6 +10,8 @@ import {
 import { SystemBars } from "react-native-edge-to-edge";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Toast, { BaseToast } from 'react-native-toast-message';
+import TouchableBounce from "@/components/ui/TouchableBounce";
+import * as WebBrowser from "expo-web-browser";
 
 // Components
 import { AsyncFont } from "@/components/data/async-font";
@@ -24,7 +26,8 @@ import { StacksProvider } from "@/contexts/StacksWalletProvider";
 import ThemeProvider from "@/components/ui/ThemeProvider";
 
 import { SourceCodePro_400Regular } from "@expo-google-fonts/source-code-pro";
-
+import { InteractionType } from "@/types/api";
+import { getExplorerUrl } from "@/utils/explorerUrl";
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
 SplashScreen.preventAutoHideAsync();
@@ -66,6 +69,7 @@ const CustomDarkTheme: Theme = {
     notification: "rgb(255, 69, 58)", // System Red (Dark Mode)
   },
 };
+
 
 
 export default function Layout() {
@@ -129,18 +133,19 @@ export default function Layout() {
                               <BaseToast
                                 style={{ borderLeftColor: '#22c55e' }}
                                 contentContainerStyle={{ backgroundColor: '#F0FFF4' }}
-                                text1="Transaction Successful"
-                                text1Style={{ color: '#166534', fontWeight: 'bold' }}
+                                text1={props?.type === InteractionType.MintNFT ? "NFT Minted" : `${props.chain} Transaction Successful`}
+                                text1Style={{ color: '#166534', fontWeight: 'bold', textDecorationLine: 'underline' }}
                                 text2Style={{ color: '#166534' }}
                                 text2={
-                                  props?.txId && props?.solanaNetwork
-                                    ? `Network: ${props.solanaNetwork} | TxID: ${props.txId}`
+                                  props?.txId && props?.network
+                                    ? `Network: ${props.network} | TxID: ${props.txId}`
                                     : props?.txId
                                       ? `TxID: ${props.txId}`
                                       : props?.chain
                                         ? `Network: ${props.chain}`
                                         : ''
                                 }
+                                onPress={props?.onPress}
                               />
                             ),
                             txFail: ({ props }) => (

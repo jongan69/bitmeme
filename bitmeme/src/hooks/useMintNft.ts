@@ -18,7 +18,8 @@ export const useMintNftWithImageUrl = () => {
         try {
           // You may want to update mintNFT to accept a metadataUri argument
           // For now, let's assume mintNFT can take an imageUrl
-          await mintNFT(imageUrl);
+          const txid = await mintNFT(imageUrl);
+          return txid;
         } catch (err) {
           throw err;
         }

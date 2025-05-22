@@ -19,6 +19,7 @@ const MEME_TABLE_SCHEMA = {
     createdBy: { type: "string" },
     solanaAddress: { type: "string" },
     bitcoinAddress: { type: "string" },
+    stacksAddress: { type: "string" },
     createdAt: { type: "string" },
   },
   likes: {

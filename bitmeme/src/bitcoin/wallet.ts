@@ -128,20 +128,20 @@ export const deriveBitcoinWallet = async (
     const network = convertBitcoinNetwork(bitcoinNetwork);
     // Debug logs for Taproot signing
     const xOnlyPubkey = toXOnly(Buffer.from(keyPairCompressed.publicKey));
-    console.log('[deriveBitcoinWallet] Signer private key (hex):', keyPairCompressed.privateKey && Buffer.from(keyPairCompressed.privateKey).toString('hex'));
-    console.log('[deriveBitcoinWallet] Signer x-only pubkey (hex):', xOnlyPubkey.toString('hex'));
+    // console.log('[deriveBitcoinWallet] Signer private key (hex):', keyPairCompressed.privateKey && Buffer.from(keyPairCompressed.privateKey).toString('hex'));
+    // console.log('[deriveBitcoinWallet] Signer x-only pubkey (hex):', xOnlyPubkey.toString('hex'));
     // Check that privKey produces the x-only pubkey
     if (keyPairCompressed.privateKey) {
       const derivedXOnlyPubkey = nobleSecp256k1.schnorr.getPublicKey(Uint8Array.from(keyPairCompressed.privateKey));
-      console.log('[deriveBitcoinWallet] Derived x-only pubkey from privKey (hex):', Buffer.from(derivedXOnlyPubkey).toString('hex'));
-      console.log('[deriveBitcoinWallet] Internal x-only pubkey (hex):', Buffer.from(xOnlyPubkey).toString('hex'));
-      console.log('[deriveBitcoinWallet] Match:', Buffer.from(derivedXOnlyPubkey).equals(Buffer.from(xOnlyPubkey)));
+      // console.log('[deriveBitcoinWallet] Derived x-only pubkey from privKey (hex):', Buffer.from(derivedXOnlyPubkey).toString('hex'));
+      // console.log('[deriveBitcoinWallet] Internal x-only pubkey (hex):', Buffer.from(xOnlyPubkey).toString('hex'));
+      // console.log('[deriveBitcoinWallet] Match:', Buffer.from(derivedXOnlyPubkey).equals(Buffer.from(xOnlyPubkey)));
       if (!Buffer.from(derivedXOnlyPubkey).equals(Buffer.from(xOnlyPubkey))) {
         console.error('[deriveBitcoinWallet] ERROR: Private key does not match internal x-only pubkey!');
       }
     }
-    console.log('[deriveBitcoinWallet] Taproot address from x-only pubkey:', bitcoin.payments.p2tr({ internalPubkey: xOnlyPubkey, network }).address);
-    console.log('[deriveBitcoinWallet] xOnlyPubkey length:', xOnlyPubkey.length);
+    // console.log('[deriveBitcoinWallet] Taproot address from x-only pubkey:', bitcoin.payments.p2tr({ internalPubkey: xOnlyPubkey, network }).address);
+    // console.log('[deriveBitcoinWallet] xOnlyPubkey length:', xOnlyPubkey.length);
     // console.log('[deriveBitcoinWallet] keyPair:', { privkey, pubkey });
 
     const p2pkh =
@@ -264,16 +264,16 @@ export function createTaprootSigner(keyPair: ECPairInterface) {
   // Get x-only pubkey
   const xOnlyPubkey = toXOnly(Buffer.from(keyPair.publicKey));
   const publicKeyBuffer = Buffer.isBuffer(xOnlyPubkey) ? xOnlyPubkey : Buffer.from(xOnlyPubkey);
-  console.log('[createTaprootSigner] publicKey is Buffer:', Buffer.isBuffer(publicKeyBuffer));
+  // console.log('[createTaprootSigner] publicKey is Buffer:', Buffer.isBuffer(publicKeyBuffer));
 
   return {
     publicKey: publicKeyBuffer,
     privateKey: privKeyBuffer,
     signSchnorr: (hash: Buffer) => {
-      console.log('[createTaprootSigner] signSchnorr called with hash:', hash.toString('hex'));
+      // console.log('[createTaprootSigner] signSchnorr called with hash:', hash.toString('hex'));
       if (typeof keyPair.signSchnorr === "function") {
         const sig = keyPair.signSchnorr(hash);
-        console.log('[createTaprootSigner] Schnorr signature:', Buffer.from(sig).toString('hex'));
+        // console.log('[createTaprootSigner] Schnorr signature:', Buffer.from(sig).toString('hex'));
         return Buffer.from(sig);
       }
       throw new Error("signSchnorr not available on keyPair");
