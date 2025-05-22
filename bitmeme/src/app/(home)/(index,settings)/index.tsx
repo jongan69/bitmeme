@@ -73,7 +73,14 @@ export default function Page() {
         await transfer(Number(tipAmount), "SOL", new PublicKey(meme.solanaAddress));
         notifySuccess("Tipped with SOL!");
       } else if (tipCurrency === "BTC" && meme.bitcoinAddress) {
-        await sendBitcoin(meme.bitcoinAddress, Number(tipAmount));
+        const DUST_THRESHOLD = 330;
+        const tipNum = Number(tipAmount);
+        if (isNaN(tipNum) || tipNum < DUST_THRESHOLD) {
+          console.log(tipNum)
+          notifyError(`Tip amount must be a number and at least ${DUST_THRESHOLD} sats (dust threshold)`);
+          return;
+        }
+        await sendBitcoin(meme.bitcoinAddress, tipNum);
         notifySuccess("Tipped with BTC!");
       } else {
         notifyInfo("No address for selected tip currency.");

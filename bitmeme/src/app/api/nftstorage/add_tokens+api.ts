@@ -1,6 +1,4 @@
-import NodeFormData from 'form-data';
-import axios from 'axios';
-import Papa from 'papaparse'; 
+import Papa from 'papaparse';
 
 export async function POST(req: Request) {
   const { collectionID, data } = await req.json(); // data is your array of objects
@@ -8,26 +6,27 @@ export async function POST(req: Request) {
   // Convert JSON array to CSV string
   const csv = Papa.unparse(data);
 
-  // Create a Buffer from the CSV string
-  const csvBuffer = Buffer.from(csv, 'utf-8');
+  // Create a Blob from the CSV string
+  const csvBlob = new Blob([csv], { type: 'text/csv' });
 
-  const form = new NodeFormData();
+  const form = new FormData();
   form.append('collectionID', collectionID);
-  form.append('file', csvBuffer, { filename: 'data.csv', contentType: 'text/csv' });
+  form.append('file', csvBlob, 'data.csv');
 
   try {
-    const res = await axios.post(
+    const res = await fetch(
       'https://preserve.nft.storage/api/v1/collection/add_tokens',
-      form,
       {
+        method: 'POST',
         headers: {
-          ...form.getHeaders(),
           Authorization: `Bearer ${process.env.NFT_STORAGE_API_KEY}`,
         },
+        body: form,
       }
     );
-    return Response.json(res.data);
+    const data = await res.json();
+    return Response.json(data, { status: res.status });
   } catch (error: any) {
-    return Response.json({ error: error.response?.data || error.message }, { status: 500 });
+    return Response.json({ error: error.message }, { status: 500 });
   }
 }

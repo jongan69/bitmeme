@@ -1,5 +1,3 @@
-import "../../polyfills";
-
 import { Suspense, useEffect } from "react";
 import { StatusBar, useColorScheme } from "react-native";
 import { Slot, SplashScreen } from "expo-router";

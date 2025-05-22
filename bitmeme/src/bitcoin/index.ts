@@ -130,6 +130,10 @@ export function xOnlyPubkeyHexToP2tr(
 export const convertBitcoinNetwork = (bitcoinNetwork: BitcoinNetwork) => {
   if (bitcoinNetwork === BitcoinNetwork.Regtest)
     return bitcoin.networks.regtest;
+  if (bitcoinNetwork === BitcoinNetwork.Testnet)
+    return bitcoin.networks.testnet;
+  // if (bitcoinNetwork === BitcoinNetwork.Mainnet)
+  //   return bitcoin.networks.mainnet;
   throw new Error("Invalid network type");
 };
 

@@ -14,7 +14,7 @@ const usePersistentStore = create<PersistentState & PersistentActions>()(
     (set) => ({
       // States
       solanaNetwork: SolanaNetwork.Devnet,
-      bitcoinNetwork: BitcoinNetwork.Regtest,
+      bitcoinNetwork: BitcoinNetwork.Testnet,
       solanaRpcProvider: SolanaRpcProvider.Zeus,
 
       // Actions

@@ -1,17 +1,17 @@
 import { useSolanaWallet } from "@/contexts/SolanaWalletProvider";
 import { TransactionList } from "@/types/transaction";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { PublicKey } from "@solana/web3.js";
 import { useCallback, useEffect, useState } from "react";
+import { getLocalStorage, setLocalStorage } from '../../utils/localStorage'
 const CACHE_PREFIX = "transactions_cache_";
 
 async function getCachedTransactions(address: string) {
-    const cached = await AsyncStorage.getItem(CACHE_PREFIX + address);
-    return cached ? JSON.parse(cached) : [];
+    const cached = await getLocalStorage(CACHE_PREFIX + address);
+    return typeof cached === "string" ? JSON.parse(cached) : [];
 }
 
 async function setCachedTransactions(address: string, transactions: any[]) {
-    await AsyncStorage.setItem(CACHE_PREFIX + address, JSON.stringify(transactions));
+    await setLocalStorage(CACHE_PREFIX + address, JSON.stringify(transactions));
 }
 
 async function getTransactions(address: PublicKey, network: string) {

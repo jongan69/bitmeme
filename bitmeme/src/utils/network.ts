@@ -4,7 +4,7 @@ import { BitcoinNetwork, SolanaNetwork } from "@/types/store";
 // import { CUSTOM_SOLANA_DEVNET_RPC_KEY, getLocalStorage } from "./localStorage";
 
 const NETWORK_CONFIG_MAP: NetworkConfigMap = {
-  [`${BitcoinNetwork.Regtest}-${SolanaNetwork.Devnet}`]: {
+  [`${BitcoinNetwork.Testnet}-${SolanaNetwork.Devnet}`]: {
     binanceUrl: "https://www.binance.com/api",
     aresUrl: process.env.EXPO_PUBLIC_REGTEST_DEVNET_ARES_URL!,
     aegleUrl: process.env.EXPO_PUBLIC_REGTEST_DEVNET_AEGLE_URL!,

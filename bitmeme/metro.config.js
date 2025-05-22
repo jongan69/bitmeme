@@ -1,27 +1,29 @@
-// Learn more https://docs.expo.io/guides/customizing-metro
+// metro.config.js
 const { getDefaultConfig } = require('expo/metro-config');
 
-module.exports = (() => {
-  const config = getDefaultConfig(__dirname);
+/** @type {import('expo/metro-config').MetroConfig} */
+const config = getDefaultConfig(__dirname);
 
-  // Add polyfill resolvers
-  config.resolver.extraNodeModules = {
-    ...(config.resolver.extraNodeModules || {}),
-    crypto: require.resolve('expo-crypto'),
-  };
+// Polyfill for `crypto` module
+config.resolver.extraNodeModules = {
+  ...(config.resolver.extraNodeModules || {}),
+  crypto: require.resolve('expo-crypto'),
+};
 
-  // Add SVG support
-  const { transformer, resolver } = config;
-  config.transformer = {
-    ...transformer,
-    babelTransformerPath: require.resolve('react-native-svg-transformer/expo'),
-  };
-  config.resolver = {
-    ...resolver,
-    assetExts: resolver.assetExts.filter((ext) => ext !== 'svg'),
-    sourceExts: [...resolver.sourceExts, 'svg'],
-    extraNodeModules: config.resolver.extraNodeModules,
-  };
+// SVG Support
+config.resolver.sourceExts.push('svg');
+config.resolver.assetExts = config.resolver.assetExts.filter(
+  (ext) => ext !== 'svg'
+);
 
-  return config;
-})();
+// Use custom SVG transformer
+config.transformer.babelTransformerPath = require.resolve('./metro.transformer.js');
+
+// Optional: fine-tune transform options
+config.transformer.getTransformOptions = async () => ({
+  transform: {
+    experimentalImportSupport: true,
+  },
+});
+
+module.exports = config;

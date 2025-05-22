@@ -35,7 +35,7 @@ export interface Wallet {
 // Ref: https://github.com/Eunovo/taproot-with-bitcoinjs/blob/main/src/index.ts#L236
 export function tweakSigner(
   signer: bitcoin.Signer,
-  opts: TweakSignerOpts = { network: bitcoin.networks.regtest }
+  opts: TweakSignerOpts = { network: bitcoin.networks.testnet }
 ): bitcoin.Signer {
   // @ts-expect-error
   let privateKey: Uint8Array | undefined = signer.privateKey!;
@@ -69,20 +69,17 @@ export function tapTweakHash(pubkey: Buffer, h: Buffer | undefined): Buffer {
 }
 
 // Helper to create a Taproot-compatible signer using @noble/secp256k1 (for React Native)
-export function createNobleTaprootSigner(privateKey: Buffer) {
-  const xOnlyPubkey = Buffer.from(
-    nobleSecp256k1.schnorr.getPublicKey(privateKey)
-  ); // 32 bytes
-
+export function createNobleTaprootSigner(privateKey: Uint8Array) {
+  const xOnlyPubkey = nobleSecp256k1.schnorr.getPublicKey(privateKey); // 32 bytes
   return {
     publicKey: xOnlyPubkey,
-    signSchnorr: async (hash: Buffer) => {
+    signSchnorr: async (hash: Uint8Array) => {
       const sig = await nobleSecp256k1.schnorr.sign(hash, privateKey);
-      return Buffer.from(sig);
+      return sig;
     },
-    sign: async (hash: Buffer) => {
+    sign: async (hash: Uint8Array) => {
       const sig = await nobleSecp256k1.schnorr.sign(hash, privateKey);
-      return Buffer.from(sig);
+      return sig;
     },
   };
 }
@@ -93,7 +90,7 @@ export const deriveBitcoinWallet = async (
   signMessage: (message: Uint8Array) => Promise<Uint8Array>
 ): Promise<BitcoinWallet | null> => {
   try {
-    console.log('[deriveBitcoinWallet] called with:', { publicKey: publicKey?.toBase58?.(), bitcoinNetwork, signMessageExists: !!signMessage });
+    // console.log('[deriveBitcoinWallet] called with:', { publicKey: publicKey?.toBase58?.(), bitcoinNetwork, signMessageExists: !!signMessage });
     if (publicKey === undefined) {
       console.log('[deriveBitcoinWallet] publicKey is undefined');
       return null;
@@ -130,10 +127,21 @@ export const deriveBitcoinWallet = async (
     const pubkey = Buffer.from(keyPairCompressed.publicKey).toString("hex");
     const network = convertBitcoinNetwork(bitcoinNetwork);
     // Debug logs for Taproot signing
-    const xOnlyPubkey = toXOnly(Buffer.from(keyPairUncompressed.publicKey));
-    console.log('[deriveBitcoinWallet] Signer private key (hex):', keyPairUncompressed.privateKey && Buffer.from(keyPairUncompressed.privateKey).toString('hex'));
+    const xOnlyPubkey = toXOnly(Buffer.from(keyPairCompressed.publicKey));
+    console.log('[deriveBitcoinWallet] Signer private key (hex):', keyPairCompressed.privateKey && Buffer.from(keyPairCompressed.privateKey).toString('hex'));
     console.log('[deriveBitcoinWallet] Signer x-only pubkey (hex):', xOnlyPubkey.toString('hex'));
+    // Check that privKey produces the x-only pubkey
+    if (keyPairCompressed.privateKey) {
+      const derivedXOnlyPubkey = nobleSecp256k1.schnorr.getPublicKey(Uint8Array.from(keyPairCompressed.privateKey));
+      console.log('[deriveBitcoinWallet] Derived x-only pubkey from privKey (hex):', Buffer.from(derivedXOnlyPubkey).toString('hex'));
+      console.log('[deriveBitcoinWallet] Internal x-only pubkey (hex):', Buffer.from(xOnlyPubkey).toString('hex'));
+      console.log('[deriveBitcoinWallet] Match:', Buffer.from(derivedXOnlyPubkey).equals(Buffer.from(xOnlyPubkey)));
+      if (!Buffer.from(derivedXOnlyPubkey).equals(Buffer.from(xOnlyPubkey))) {
+        console.error('[deriveBitcoinWallet] ERROR: Private key does not match internal x-only pubkey!');
+      }
+    }
     console.log('[deriveBitcoinWallet] Taproot address from x-only pubkey:', bitcoin.payments.p2tr({ internalPubkey: xOnlyPubkey, network }).address);
+    console.log('[deriveBitcoinWallet] xOnlyPubkey length:', xOnlyPubkey.length);
     // console.log('[deriveBitcoinWallet] keyPair:', { privkey, pubkey });
 
     const p2pkh =
@@ -166,7 +174,13 @@ export const deriveBitcoinWallet = async (
     // console.log('[deriveBitcoinWallet] tweakKeypair:', tweakKeypair);
 
     // Add nobleTaprootSigner
-    const nobleTaprootSigner = createNobleTaprootSigner(signature_hash);
+    const nobleTaprootSignerRaw = createNobleTaprootSigner(signature_hash);
+    const nobleTaprootSigner = {
+      ...nobleTaprootSignerRaw,
+      publicKey: Buffer.from(nobleTaprootSignerRaw.publicKey),
+      sign: async (hash: Uint8Array) => Buffer.from(await nobleTaprootSignerRaw.sign(hash)),
+      signSchnorr: async (hash: Uint8Array) => Buffer.from(await nobleTaprootSignerRaw.signSchnorr(hash)),
+    };
 
     const result = {
       privkeyHex: privkey_hex,
@@ -176,7 +190,7 @@ export const deriveBitcoinWallet = async (
       p2wpkh,
       p2tr,
       tweakSigner: tweakKeypair,
-      signer: createTaprootSigner(keyPairUncompressed),
+      signer: createTaprootSigner(keyPairCompressed),
       nobleTaprootSigner,
     };
     // console.log('[deriveBitcoinWallet] result:', result);
@@ -249,9 +263,11 @@ export function createTaprootSigner(keyPair: ECPairInterface) {
 
   // Get x-only pubkey
   const xOnlyPubkey = toXOnly(Buffer.from(keyPair.publicKey));
+  const publicKeyBuffer = Buffer.isBuffer(xOnlyPubkey) ? xOnlyPubkey : Buffer.from(xOnlyPubkey);
+  console.log('[createTaprootSigner] publicKey is Buffer:', Buffer.isBuffer(publicKeyBuffer));
 
   return {
-    publicKey: xOnlyPubkey,
+    publicKey: publicKeyBuffer,
     privateKey: privKeyBuffer,
     signSchnorr: (hash: Buffer) => {
       console.log('[createTaprootSigner] signSchnorr called with hash:', hash.toString('hex'));
@@ -291,46 +307,99 @@ export async function signTaprootInputWithNoble({
 }: {
   psbt: bitcoin.Psbt;
   inputIndex?: number;
-  xOnlyPubkey: Buffer;
+  xOnlyPubkey: Uint8Array;
   inputValue: number;
-  privateKey: Buffer;
+  privateKey: Uint8Array;
   network: bitcoin.networks.Network;
 }): Promise<string> {
-  // Extract the unsigned transaction
+  try {
+    psbt.finalizeInput(inputIndex);
+    console.log('[DEBUG][signTaprootInputWithNoble] Successfully finalized input', inputIndex);
+  } catch (e) {
+    console.warn('[DEBUG][signTaprootInputWithNoble] Could not finalize input before extraction:', e);
+  }
   let tx;
+  let usedCache = false;
   try {
     tx = psbt.extractTransaction(true);
+    console.log('[DEBUG][signTaprootInputWithNoble] Used extractTransaction(true)');
   } catch (e) {
-    // Fallback: use private property if extractTransaction(true) fails (e.g., Not finalized)
-    // This is safe for manual Taproot signing as we set the witness ourselves
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     if (psbt.__CACHE && psbt.__CACHE.__TX) {
       // @ts-ignore
       tx = psbt.__CACHE.__TX;
+      usedCache = true;
+      console.log('[DEBUG][signTaprootInputWithNoble] Used psbt.__CACHE.__TX');
     } else {
       throw e;
     }
   }
-
-  // Prepare prevout script for sighash
-  const prevoutScript = bitcoin.payments.p2tr({ internalPubkey: xOnlyPubkey, network }).output!;
-
-  // Compute the sighash for Taproot key path spend
-  const sighashType = bitcoin.Transaction.SIGHASH_DEFAULT; // 0x00
+  const prevoutScript = bitcoin.payments.p2tr({ internalPubkey: Buffer.from(xOnlyPubkey), network }).output!;
+  const sighashType = bitcoin.Transaction.SIGHASH_DEFAULT;
   const sighash = tx.hashForWitnessV1(
     inputIndex,
-    [prevoutScript], // array of all prevout scripts (single input)
-    [inputValue],    // array of all input values
+    [prevoutScript],
+    [inputValue],
     sighashType
   );
-
-  // Sign with noble-secp256k1
-  const schnorrSig = await nobleSecp256k1.schnorr.sign(sighash, privateKey);
-
-  // Set the witness for the input
+  const sighashUint8 = sighash instanceof Uint8Array ? sighash : Uint8Array.from(sighash);
+  console.log('[DEBUG][signTaprootInputWithNoble] Sighash:', Buffer.from(sighashUint8).toString('hex'), 'type:', typeof sighashUint8, 'length:', sighashUint8.length);
+  console.log('[DEBUG][signTaprootInputWithNoble] prevoutScript:', prevoutScript.toString('hex'));
+  const schnorrSig = await nobleSecp256k1.schnorr.sign(sighashUint8, privateKey);
+  console.log('[DEBUG][signTaprootInputWithNoble] Schnorr signature:', Buffer.from(schnorrSig).toString('hex'), 'type:', typeof schnorrSig, 'length:', schnorrSig.length);
+  await verifyTaprootSchnorrSignature({
+    signature: schnorrSig,
+    sighash: sighashUint8,
+    publicKey: xOnlyPubkey,
+  });
   tx.ins[inputIndex].witness = [Buffer.from(schnorrSig)];
+  const rawTxHex = tx.toHex();
+  console.log('[DEBUG][signTaprootInputWithNoble] Raw transaction hex:', rawTxHex);
+  if (!usedCache) {
+    try {
+      // @ts-expect-error
+      const txCache = psbt.__CACHE.__TX;
+      txCache.ins[inputIndex].witness = [Buffer.from(schnorrSig)];
+      const rawTxHexCache = txCache.toHex();
+      console.log('[DEBUG][signTaprootInputWithNoble] Raw transaction hex from __CACHE.__TX:', rawTxHexCache);
+    } catch (e) {
+      console.warn('[DEBUG][signTaprootInputWithNoble] Error using __CACHE.__TX for witness/serialization:', e);
+    }
+  }
+  return rawTxHex;
+}
 
-  // Serialize and return the signed transaction hex
-  return tx.toHex();
+// Try signing a PSBT using bitcoinjs-lib's signAllInputsAsync with nobleTaprootSigner
+export async function tryBitcoinjsLibTaprootSign(psbt: bitcoin.Psbt, nobleTaprootSigner: any) {
+  try {
+    console.log('[DEBUG][tryBitcoinjsLibTaprootSign] Attempting to sign all inputs with nobleTaprootSigner...');
+    await psbt.signAllInputsAsync(nobleTaprootSigner);
+    psbt.finalizeAllInputs();
+    const signedTxHex = psbt.extractTransaction().toHex();
+    console.log('[DEBUG][tryBitcoinjsLibTaprootSign] Signed transaction hex:', signedTxHex);
+    return signedTxHex;
+  } catch (e) {
+    console.error('[DEBUG][tryBitcoinjsLibTaprootSign] Error:', e);
+    throw e;
+  }
+}
+
+// Helper to verify a Taproot Schnorr signature locally
+export async function verifyTaprootSchnorrSignature({
+  signature,
+  sighash,
+  publicKey,
+}: {
+  signature: Uint8Array;
+  sighash: Uint8Array;
+  publicKey: Uint8Array;
+}): Promise<boolean> {
+  try {
+    const isValid = await nobleSecp256k1.schnorr.verify(signature, sighash, publicKey);
+    console.log('[DEBUG][verifyTaprootSchnorrSignature] Signature valid locally:', isValid);
+    return isValid;
+  } catch (e) {
+    console.error('[DEBUG][verifyTaprootSchnorrSignature] Error verifying signature:', e);
+    return false;
+  }
 }

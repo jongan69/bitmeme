@@ -35,11 +35,12 @@ import { useHoldings } from "@/hooks/misc/useHoldings";
 import { PublicKey } from "@solana/web3.js";
 import Icon from "@/components/ui/Icons";
 import TouchableBounce from "@/components/ui/TouchableBounce";
-import useBitcoinUTXOs from "@/hooks/ares/useBitcoinUTXOs";
+// import useBitcoinUTXOs from "@/hooks/ares/useBitcoinUTXOs";
 import { estimateMaxSpendableAmount } from "@/bitcoin";
 import useTwoWayPegConfiguration from "@/hooks/zpl/useTwoWayPegConfiguration";
 import { useMultiAirdrop } from "@/hooks/useMultiAirdrop";
 import { SolanaNetwork, BitcoinNetwork } from "@/types/store";
+import { useBtcBalanceSats } from "@/hooks/misc/useBtcBalanceSats";
 
 function Switches({ autoTipOn, setAutoTipOn }: { autoTipOn: boolean; setAutoTipOn: (value: boolean) => void }) {
   return (
@@ -88,13 +89,13 @@ const BalancesSection = memo(function BalancesSection({
         <Form.HStack style={{ justifyContent: 'center', alignItems: 'center', width: '100%' }}>
           <View style={{ flex: 1 }}>
             <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
-              Your STX balance: {balance?.toString()}
+              STX balance: {balance?.toString()} STX
             </Form.Text>
               <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
-                Your SOL balance: {nativeBalance.lamports}
+                SOL balance: {nativeBalance.lamports} Lamports
               </Form.Text>
               <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
-                Your BTC balance: {spendableUTXOs}
+                BTC balance: {spendableUTXOs} sats
               </Form.Text>
           </View>
           <TouchableBounce
@@ -160,16 +161,17 @@ export default function Page() {
 
   // Use memoized publicKey in useHoldings
   const holdingsResult = publicKey ? useHoldings(publicKey) : { nativeBalance: { lamports: 0 }, refetch: () => {}, loading: false };
+  const { balance: btcBalance, loading: btcLoading, error: btcError, refresh: btcRefresh } = useBtcBalanceSats(bitcoinAddress ?? null, BitcoinNetwork.Testnet);
   const nativeBalance = holdingsResult.nativeBalance;
   const refetchNativeBalance = holdingsResult.refetch;
   const isSolLoading = holdingsResult.loading;
-  const { data: bitcoinUTXOs, mutate: refetchBitcoinUTXOs, isLoading: isBitcoinLoading } = useBitcoinUTXOs(bitcoinAddress ?? null);
+  // const { data: bitcoinUTXOs, mutate: refetchBitcoinUTXOs, isLoading: isBitcoinLoading } = useBitcoinUTXOs(bitcoinAddress ?? null);
 
-  const [spendableUTXOs, setSpendableUTXOs] = useState(() => estimateMaxSpendableAmount(bitcoinUTXOs ?? [], feeRate));
+  // const [spendableUTXOs, setSpendableUTXOs] = useState(() => estimateMaxSpendableAmount(bitcoinUTXOs ?? [], feeRate));
 
-  useEffect(() => {
-    setSpendableUTXOs(estimateMaxSpendableAmount(bitcoinUTXOs ?? [], feeRate));
-  }, [bitcoinUTXOs, feeRate]);
+  // useEffect(() => {
+  //   setSpendableUTXOs(estimateMaxSpendableAmount(bitcoinUTXOs ?? [], feeRate));
+  // }, [bitcoinUTXOs, feeRate]);
   
   const { signOut } = useClerk();
 
@@ -195,8 +197,8 @@ export default function Page() {
   const refreshBalances = useCallback(() => {
     mutate();
     refetchNativeBalance();
-    refetchBitcoinUTXOs();
-  }, [mutate, refetchNativeBalance, refetchBitcoinUTXOs]);
+    btcRefresh();
+  }, [mutate, refetchNativeBalance, btcRefresh]);
 
   // Change handleShowBalances to:
   const handleShowBalances = useCallback(() => {
@@ -270,7 +272,7 @@ export default function Page() {
   });
 
   // Use validation/loading flags for spinner
-  const isRefreshingBalances = isStacksValidating || isSolLoading || isBitcoinLoading;
+  const isRefreshingBalances = isStacksValidating || isSolLoading || btcLoading;
 
   return (
     <KeyboardAvoidingView
@@ -355,7 +357,7 @@ export default function Page() {
               isRefreshing={isRefreshingBalances}
               balance={balance}
               nativeBalance={nativeBalance}
-              spendableUTXOs={spendableUTXOs}
+              spendableUTXOs={btcBalance}
               gravatarUri={gravatarUri}
             />
           )}

@@ -1,7 +1,4 @@
-import { createAxiosInstances } from "@/utils/axios";
-import { MODAL_NAMES } from "@/utils/constant";
 import { notifyError } from "@/utils/notification";
-import useStore from "@/stores/local/store";
 import { BitcoinNetwork } from "@/types/store";
 import { SolanaNetwork } from "@/types/store";
 
@@ -46,27 +43,5 @@ export async function requestBtcAirdrop({
   bitcoinNetwork: BitcoinNetwork;
   claimAmountLimit?: number;
 }): Promise<"success" | "limit-reached" | "error"> {
-  const { aegleApi } = createAxiosInstances(solanaNetwork, bitcoinNetwork);
-  const claimUrl = `api/v1/bitcoin-regtest-wallet/${bitcoinAddress}/claim`;
-
-  try {
-    const response = await aegleApi.post(claimUrl, {
-      amount: claimAmountLimit,
-    });
-
-    if (response.status === 200) {
-      useStore.getState().openModalByName(MODAL_NAMES.SUCCESSFUL_CLAIM);
-      return "success";
-    } else if (response.status === 429) {
-      notifyError("You have reached the daily claim limit.");
-      return "limit-reached";
-    } else {
-      notifyError("Unexpected response. Please try again later.");
-      return "error";
-    }
-  } catch (err) {
-    console.error("[requestBtcAirdrop] Error:", err);
-    notifyError("Claim failed. Please try again later.");
-    return "error";
-  }
+  return "success";
 }

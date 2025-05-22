@@ -2103,10 +2103,10 @@
     "@noble/hashes" "~1.1.1"
     "@scure/base" "~1.1.0"
 
-"@shopify/flash-list@^1.8.0":
-  version "1.8.0"
-  resolved "https://registry.npmjs.org/@shopify/flash-list/-/flash-list-1.8.0.tgz"
-  integrity sha512-APZ48kceCCJobUimmI2594io+HujELK60HFKgzIyIdHGX5ySR5YfvsPy3PKtPwHHDtIMFNaq3U/BY3qZocOhCA==
+"@shopify/flash-list@1.7.6":
+  version "1.7.6"
+  resolved "https://registry.npmjs.org/@shopify/flash-list/-/flash-list-1.7.6.tgz"
+  integrity sha512-0kuuAbWgy4YSlN05mt0ScvxK8uiDixMsICWvDed+LTxvZ5+5iRyt3M8cRLUroB8sfiZlJJZWlxHrx0frBpsYOQ==
   dependencies:
     recyclerlistview "4.2.3"
     tslib "2.8.1"
@@ -4951,7 +4951,7 @@ expo-blur@~14.1.4:
 expo-clipboard@~7.1.4:
   version "7.1.4"
 
-expo-constants@*, expo-constants@~17.1.4, expo-constants@~17.1.5, expo-constants@~17.1.6:
+expo-constants@*, expo-constants@~17.1.4, expo-constants@~17.1.5, expo-constants@~17.1.6, expo-constants@17.1.6:
   version "17.1.6"
   resolved "https://registry.npmjs.org/expo-constants/-/expo-constants-17.1.6.tgz"
   integrity sha512-q5mLvJiLtPcaZ7t2diSOlQ2AyxIO8YMVEJsEfI/ExkGj15JrflNQ7CALEW6IF/uNae/76qI/XcjEuuAyjdaCNw==
@@ -4982,8 +4982,10 @@ expo-font@*, expo-font@~13.3.1:
 expo-haptics@~14.1.4:
   version "14.1.4"
 
-expo-image@~2.1.6:
-  version "2.1.6"
+expo-image@2.1.7:
+  version "2.1.7"
+  resolved "https://registry.npmjs.org/expo-image/-/expo-image-2.1.7.tgz"
+  integrity sha512-p2Gr8fP/YakFHHo4rbpJbRWwKNrZp1GzSD91WEG3ZYAbTVdTjheJ6gUxXgggFaxEbaY+4WeQ0c5j9tZq8+3cEg==
 
 expo-json-utils@~0.15.0:
   version "0.15.0"
@@ -4991,10 +4993,12 @@ expo-json-utils@~0.15.0:
 expo-keep-awake@~14.1.4:
   version "14.1.4"
 
-expo-linking@*, expo-linking@~7.1.4:
-  version "7.1.4"
+expo-linking@*, expo-linking@~7.1.4, expo-linking@7.1.5:
+  version "7.1.5"
+  resolved "https://registry.npmjs.org/expo-linking/-/expo-linking-7.1.5.tgz"
+  integrity sha512-8g20zOpROW78bF+bLI4a3ZWj4ntLgM0rCewKycPL0jk9WGvBrBtFtwwADJgOiV1EurNp3lcquerXGlWS+SOQyA==
   dependencies:
-    expo-constants "~17.1.4"
+    expo-constants "~17.1.6"
     invariant "^2.2.4"
 
 expo-manifests@~0.16.5:
@@ -5028,8 +5032,10 @@ expo-network@^7.1.5:
   resolved "https://registry.npmjs.org/expo-network/-/expo-network-7.1.5.tgz"
   integrity sha512-VNgxNe3Y1xo00zMzFy7Q+35qWnSJnjZ9RRLtW3Nu/ITtv9ak+BIghfWj1PANLYB3ZkWzY5656R1YIkkRkeDukg==
 
-expo-router@~5.0.5:
-  version "5.0.5"
+expo-router@5.0.7:
+  version "5.0.7"
+  resolved "https://registry.npmjs.org/expo-router/-/expo-router-5.0.7.tgz"
+  integrity sha512-NlEgRXCKtseDuIHBp87UfkvqsuVrc0MYG+zg33dopaN6wik4RkrWWxUYdNPHub0s/7qMye6zZBY4ZCrXwd/xpA==
   dependencies:
     "@expo/metro-runtime" "5.0.4"
     "@expo/server" "^0.6.2"
@@ -5056,7 +5062,7 @@ expo-splash-screen@~0.30.8:
   dependencies:
     "@expo/prebuild-config" "^9.0.5"
 
-expo-sqlite@^15.2.10, expo-sqlite@~15.2.9:
+expo-sqlite@^15.2.10, expo-sqlite@15.2.10:
   version "15.2.10"
   resolved "https://registry.npmjs.org/expo-sqlite/-/expo-sqlite-15.2.10.tgz"
   integrity sha512-F7IYvXSOh3vIqhRkmaUvIP595Oqh8888CV5wpys94/437LkMYAOzMnqoscr+TCCmcO9XWURsMbBGsCVPHanlYQ==
@@ -5106,7 +5112,7 @@ expo-updates@~0.28.12:
 expo-web-browser@>=12.5.0, expo-web-browser@~14.1.6:
   version "14.1.6"
 
-expo@*, expo@^53, expo@^53.0.9:
+expo@*, expo@^53.0.9, expo@53.0.9:
   version "53.0.9"
   resolved "https://registry.npmjs.org/expo/-/expo-53.0.9.tgz"
   integrity sha512-UFG68aVOpccg3s++S3pbtI3YCQCnlu/TFvhnQ5vaD3vhOox1Uk/f2O2T95jmwA/EvKvetqGj34lys3DNXvPqgQ==

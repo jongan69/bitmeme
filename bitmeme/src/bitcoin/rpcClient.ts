@@ -1,46 +1,28 @@
-import type { AxiosError } from "axios";
-import { AxiosInstance } from "axios";
-
-export const sendTransaction = async (
-  aresApi: AxiosInstance,
-  rawTx: string
-): Promise<string> => {
-  console.log("[sendTransaction] Broadcasting payload:", rawTx);
-  try {
-    const res = await aresApi.post("/api/v1/transaction/broadcast", rawTx, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    console.log("[sendTransaction] Response:", res.data);
-    const txId = res.data.data;
-    return txId;
-  } catch (error) {
-    const err = error as AxiosError;
-    console.error("[sendTransaction] Error response:", err?.response?.data || err);
-    throw error;
-  }
-};
-
 /**
- * Broadcast a raw transaction hex via Blockstream's public API.
+ * Broadcast a raw transaction hex.
  * @param rawTx - The raw transaction hex string
  * @param network - 'mainnet' or 'testnet' (default: 'testnet')
  * @returns Promise<string> - The transaction ID (txid)
  */
-export const broadcastRawTxViaBlockstream = async (
+export const broadcastRawTx = async (
   rawTx: string,
   network: 'mainnet' | 'testnet' = 'testnet'
 ): Promise<string> => {
   const url = network === 'mainnet'
     ? 'https://blockstream.info/api/tx'
-    : 'https://mempool.space/testnet4/api/tx';
+    : 'https://warmhearted-morning-cherry.btc-testnet.quiknode.pro/';
   try {
     console.log('[broadcastRawTxViaBlockstream] Broadcasting payload:', rawTx);
+    console.log('using url: ', url)
+    const body = JSON.stringify({
+      "id": 1, 
+      "jsonrpc": "2.0", 
+      "method": "sendrawtransaction", 
+      "params": [rawTx]
+    });
     const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: rawTx,
+      body,
     });
     console.log('[broadcastRawTxViaBlockstream] Response:', res);
     if (!res.ok) {
@@ -52,6 +34,72 @@ export const broadcastRawTxViaBlockstream = async (
     return txid.trim();
   } catch (error) {
     console.error('[broadcastRawTxViaBlockstream] Error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Test if a raw transaction would be accepted into the mempool (dry run, no broadcast).
+ * @param rawTx - The raw transaction hex string
+ * @param network - 'mainnet' or 'testnet' (default: 'testnet')
+ * @returns Promise<any> - The mempool accept result
+ */
+export const testMempoolAccept = async (
+  rawTx: string,
+  network: 'mainnet' | 'testnet' = 'testnet'
+): Promise<any> => {
+  const url = network === 'mainnet'
+    ? 'https://blockstream.info/api/tx' // Replace with your mainnet RPC endpoint if needed
+    : 'https://warmhearted-morning-cherry.btc-testnet.quiknode.pro/';
+  try {
+    const body = JSON.stringify({
+      id: 1,
+      jsonrpc: '2.0',
+      method: 'testmempoolaccept',
+      params: [[rawTx]]
+    });
+    const res = await fetch(url, {
+      method: 'POST',
+      body,
+    });
+    const result = await res.json();
+    console.log('[testMempoolAccept] Response:', JSON.stringify(result, null, 2));
+    return result;
+  } catch (error) {
+    console.error('[testMempoolAccept] Error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Decode a raw transaction hex into a human-readable JSON structure.
+ * @param rawTx - The raw transaction hex string
+ * @param network - 'mainnet' or 'testnet' (default: 'testnet')
+ * @returns Promise<any> - The decoded transaction
+ */
+export const decodeRawTransaction = async (
+  rawTx: string,
+  network: 'mainnet' | 'testnet' = 'testnet'
+): Promise<any> => {
+  const url = network === 'mainnet'
+    ? 'https://blockstream.info/api/tx' // Replace with your mainnet RPC endpoint if needed
+    : 'https://warmhearted-morning-cherry.btc-testnet.quiknode.pro/';
+  try {
+    const body = JSON.stringify({
+      id: 1,
+      jsonrpc: '2.0',
+      method: 'decoderawtransaction',
+      params: [rawTx]
+    });
+    const res = await fetch(url, {
+      method: 'POST',
+      body,
+    });
+    const result = await res.json();
+    console.log('[decodeRawTransaction] Response:', JSON.stringify(result, null, 2));
+    return result;
+  } catch (error) {
+    console.error('[decodeRawTransaction] Error:', error);
     throw error;
   }
 };

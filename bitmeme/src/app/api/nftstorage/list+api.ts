@@ -1,14 +1,16 @@
-import axios from 'axios';
-
 export async function GET() {
   try {
-    const res = await axios.get('https://preserve.nft.storage/api/v1/collection/list_collections', {
+    const res = await fetch('https://preserve.nft.storage/api/v1/collection/list_collections', {
       headers: {
         Authorization: `Bearer ${process.env.NFT_STORAGE_API_KEY}`,
       },
     });
-    return Response.json(res.data);
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || res.statusText);
+    }
+    return Response.json(data);
   } catch (error: any) {
-    return Response.json({ error: error.response?.data || error.message }, { status: 500 });
+    return Response.json({ error: error.message }, { status: 500 });
   }
 }

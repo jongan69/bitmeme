@@ -1,4 +1,4 @@
-import "../../polyfills";
+// import "../../polyfills";
 import { getAccount, getAssociatedTokenAddress } from "@solana/spl-token";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { BigNumber } from "bignumber.js";

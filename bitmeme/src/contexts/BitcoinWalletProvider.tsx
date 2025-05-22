@@ -1,4 +1,4 @@
-import "../../polyfills";
+
 
 import { PublicKey } from "@solana/web3.js";
  
@@ -19,6 +19,7 @@ import {
 import {
   deriveBitcoinWallet,
   getBitcoinConnectorWallet,
+  tweakSigner,
   txConfirm
 } from "@/bitcoin/wallet";
 
@@ -31,11 +32,10 @@ import { notifyError } from "@/utils/notification";
 import { MusesConnector } from "./connector";
 
 import { type BaseConnector } from "./connector/base";
-import { createAxiosInstances } from "@/utils/axios";
-import { broadcastRawTxViaBlockstream } from "@/bitcoin/rpcClient";
+import { broadcastRawTx } from "@/bitcoin/rpcClient";
 import { getInternalXOnlyPubkeyFromUserWallet } from "@/bitcoin/wallet";
-import { signTaprootInputWithNoble } from "@/bitcoin/wallet";
-import { schnorr } from '@noble/secp256k1';
+import ecc from '@bitcoinerlab/secp256k1';
+import ECPairFactory from 'ecpair';
 
 const connectors: BaseConnector[] = [new MusesConnector()];
 
@@ -80,6 +80,43 @@ export interface BitcoinWalletContextState {
 const BitcoinWalletContext = createContext<BitcoinWalletContextState | null>(
   null
 );
+
+// Helper: Convert Uint8Array to BigInt (big-endian)
+function bytesToBigIntBE(bytes: Uint8Array): bigint {
+  return BigInt('0x' + Buffer.from(bytes).toString('hex'));
+}
+// Helper: Convert BigInt to Uint8Array (big-endian)
+function bigIntToBytesBE(num: bigint, length = 32): Uint8Array {
+  let hex = num.toString(16);
+  if (hex.length % 2 !== 0) hex = '0' + hex;
+  hex = hex.padStart(length * 2, '0');
+  return Uint8Array.from(Buffer.from(hex, 'hex'));
+}
+// Helper: Taproot tweak (BIP-341) for private key (big-endian math)
+// function taprootTweakPrivKey(privKey: Uint8Array, pubKey: Uint8Array): Uint8Array {
+//   const tweak = taggedHash('TapTweak', Buffer.from(pubKey));
+//   const priv = bytesToBigIntBE(privKey);
+//   const twk = bytesToBigIntBE(tweak);
+//   const n = CURVE.n;
+//   const tweaked = (priv + twk) % n;
+//   return bigIntToBytesBE(tweaked, 32);
+// }
+
+// Helper: BIP-340 lift x-only pubkey to Point (assume even y)
+// function liftXOnlyPubkey(xOnly: Uint8Array): typeof Point.BASE {
+//   return Point.fromHex(Buffer.concat([Buffer.from([0x02]), xOnly]));
+// }
+
+// Helper: Get tweaked x-only pubkey for Taproot key-spend (BIP-340)
+// function getTweakedXOnlyPubkey(internalPubkey: Uint8Array): Uint8Array {
+//   const tweak = taggedHash('TapTweak', Buffer.from(internalPubkey));
+//   const P = liftXOnlyPubkey(internalPubkey);
+//   const Q = P.add(Point.fromPrivateKey(tweak));
+//   return Q.toRawX();
+// }
+
+// Create ECPair instance using the same method as wallet.ts
+const ECPair = ECPairFactory(ecc);
 
 export function BitcoinWalletProvider({ children }: { children: ReactNode }) {
   const bitcoinNetwork = usePersistentStore((state: { bitcoinNetwork: any; }) => state.bitcoinNetwork);
@@ -417,171 +454,160 @@ export function BitcoinWalletProvider({ children }: { children: ReactNode }) {
     handleDisconnect();
   }
 
-  // Function to send Bitcoin using a Solana-derived wallet
+  const DUST_THRESHOLD = 330; // P2TR dust threshold
+
   const sendBitcoinWithDerivedWallet = useCallback(
     async (
       toAddress: string,
       satoshis: number,
-      options?: { feeRate: number }
     ) => {
       if (!bitcoinWallet || bitcoinWalletType !== "solana") {
         throw new Error("Solana-derived Bitcoin wallet not connected");
       }
       try {
-        // 1. Fetch UTXOs from backend (aresApi)
-        const { aresApi } = createAxiosInstances(
-          usePersistentStore.getState().solanaNetwork,
-          bitcoinNetwork
-        );
-        const utxosRes = await aresApi.get(`/api/v1/address/${bitcoinWallet.p2tr}/utxos`);
-        const utxosRaw = Array.isArray(utxosRes.data) ? utxosRes.data : utxosRes.data?.data ?? [];
-        // Ensure all satoshis are numbers and integers
-        const utxos = utxosRaw.map((u: any) => ({ ...u, satoshis: Number(u.satoshis) }));
+        console.log('[sendBitcoinWithDerivedWallet] Starting transaction...');
+        // 0. Fetch recommended fee rate
+        let feeRate = 2; // fallback default
+        try {
+          const response = await fetch("https://warmhearted-morning-cherry.btc-testnet.quiknode.pro/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: 1,
+              jsonrpc: "2.0",
+              method: "estimatesmartfee",
+              params: [10], // 10 blocks target
+            }),
+          });
+          const data = await response.json();
+          const feerateBtcPerKb = data.result?.feerate;
+          if (feerateBtcPerKb) {
+            feeRate = Math.ceil((feerateBtcPerKb * 1e8) / 1000); // sats/vByte
+            if (feeRate < 1) feeRate = 1; // never go below 1
+          }
+          console.log('[sendBitcoinWithDerivedWallet] Using dynamic feeRate:', feeRate, 'sats/vByte');
+        } catch (e) {
+          console.warn('[sendBitcoinWithDerivedWallet] Failed to fetch dynamic fee rate, using default:', feeRate);
+        }
+
+        // 1. Fetch UTXOs from mempool.space
+        const utxosRes = await fetch(`https://mempool.space/testnet/api/address/${bitcoinWallet.p2tr}/utxo`);
+        const utxosRaw = await utxosRes.json();
+        // Map UTXOs to expected format
+        const utxos = utxosRaw.map((u: any) => ({
+          transaction_id: u.txid,
+          transaction_index: u.vout,
+          satoshis: Number(u.value),
+        }));
         console.log('Derived P2TR address:', bitcoinWallet.p2tr);
         console.log('UTXO list:', utxos);
         if (!utxos || utxos.length === 0) throw new Error("No UTXOs found for your address. Please fund your wallet.");
 
+        // Fetch and log the exact UTXO value and script from mempool.space for the first UTXO
+        const utxoToSpend = utxos[0];
+        const txDetailsRes = await fetch(`https://mempool.space/testnet/api/tx/${utxoToSpend.transaction_id}`);
+        const txDetails = await txDetailsRes.json();
+        const vout = txDetails.vout[utxoToSpend.transaction_index];
+        console.log('[DEBUG][UTXO] On-chain value:', vout.value, 'sats');
+        console.log('[DEBUG][UTXO] On-chain scriptPubKey:', vout.scriptpubkey);
+
         // 2. Build the PSBT for a simple P2TR send
-        const feeRate = options?.feeRate || 1; // default to 1 sat/vbyte if not provided
         const userXOnlyPubKey = getInternalXOnlyPubkeyFromUserWallet(bitcoinWallet);
         if (!userXOnlyPubKey) throw new Error("Could not get x-only pubkey from wallet");
         const network = bitcoinNetwork === 'regtest' ? bitcoin.networks.regtest : bitcoin.networks.testnet;
-        console.log('[sendBitcoinWithDerivedWallet] Network:', network, bitcoinNetwork);
-        // Ensure satoshis is an integer
         const satoshisInt = Math.floor(Number(satoshis));
+        console.log('[sendBitcoinWithDerivedWallet] Tip amount (satoshis):', satoshis, 'Parsed int:', satoshisInt, 'DUST_THRESHOLD:', DUST_THRESHOLD);
+        if (satoshisInt < DUST_THRESHOLD) throw new Error("Recipient output is below dust threshold");
 
-        // Build PSBT for simple P2TR send
-        const psbt = new bitcoin.Psbt({ network });
+        // 1. Add all inputs
         let inputSum = 0;
-        const fee = feeRate * 100; // crude estimate: 100 vbytes per tx, adjust as needed
+        const psbt = new bitcoin.Psbt({ network });
         for (const utxo of utxos) {
-          // Debug: print expected script for this input
-          const expectedScript = bitcoin.payments.p2tr({ internalPubkey: userXOnlyPubKey, network }).output!.toString('hex');
-          console.log('--- UTXO DEBUG ---');
-          console.log('UTXO transaction_id:', utxo.transaction_id);
-          console.log('UTXO transaction_index:', utxo.transaction_index);
-          console.log('Expected script for derived address:', expectedScript);
-          console.log('Derived P2TR address:', bitcoinWallet.p2tr);
-          console.log('Signer public key (hex):', Buffer.isBuffer(bitcoinWallet.signer?.publicKey) ? bitcoinWallet.signer.publicKey.toString('hex') : bitcoinWallet.signer?.publicKey);
-          console.log('UTXO value (satoshis):', utxo.satoshis);
-          console.log('Network:', network, bitcoinNetwork);
-          // Optionally, fetch the funding transaction and print the scriptPubKey at utxo.transaction_index
-          // (requires backend or explorer call)
+          const script = bitcoin.payments.p2tr({ internalPubkey: userXOnlyPubKey, network }).output!;
+          console.log('[DEBUG][PSBT input] witnessUtxo.script:', script.toString('hex'));
+          console.log('[DEBUG][PSBT input] tapInternalKey:', userXOnlyPubKey.toString('hex'));
+          console.log('[DEBUG][PSBT input] witnessUtxo.value:', utxo.satoshis);
           psbt.addInput({
             hash: utxo.transaction_id,
             index: utxo.transaction_index,
             witnessUtxo: {
-              script: bitcoin.payments.p2tr({ internalPubkey: userXOnlyPubKey, network }).output!,
+              script,
               value: utxo.satoshis,
             },
             tapInternalKey: userXOnlyPubKey,
           });
           inputSum += utxo.satoshis;
-          if (inputSum >= satoshisInt + fee) break;
+          if (inputSum >= satoshisInt) break;
         }
-        if (inputSum < satoshisInt + fee) throw new Error("Insufficient funds for this transaction, including fees.");
+        if (inputSum < satoshisInt) throw new Error("Insufficient funds for this transaction, including fees.");
+
+        // 2. Add recipient output
         psbt.addOutput({
           address: toAddress,
           value: satoshisInt,
         });
-        const DUST_THRESHOLD = 330; // for P2TR
+
+        // 3. Estimate fee using virtual size (with only recipient output)
+        let vsize = 100;
+        try {
+          vsize = psbt.extractTransaction().virtualSize();
+        } catch (e) {}
+        const fee = Math.ceil(feeRate * vsize);
+
+        // 4. Calculate real change
         const change = inputSum - satoshisInt - fee;
+        if (change < 0) throw new Error("Insufficient funds for this transaction, including fees.");
+
+        // 5. Add real change output if above dust
+        const changeAddress = bitcoin.payments.p2tr({
+          internalPubkey: userXOnlyPubKey,
+          network,
+        }).address;
+        if (!changeAddress) throw new Error("Failed to derive change address");
         if (change >= DUST_THRESHOLD) {
           psbt.addOutput({
-            address: bitcoinWallet.p2tr,
+            address: changeAddress,
             value: change,
           });
         } else if (change > 0) {
           // Add to fee, do not create dust output
-          // Optionally log: console.log('Change below dust threshold, adding to fee:', change);
+          console.log('[sendBitcoinWithDerivedWallet] Change below dust threshold, adding to fee:', change);
         }
+
         // Log PSBT inputs and outputs
         console.log('[sendBitcoinWithDerivedWallet] PSBT inputs:', psbt.data.inputs);
         console.log('[sendBitcoinWithDerivedWallet] PSBT outputs:', psbt.txOutputs);
         console.log('[sendBitcoinWithDerivedWallet] Constructed PSBT:', psbt.toHex());
 
-        // 3. Sign the PSBT
-        // If single input and nobleTaprootSigner is present, use manual Taproot signing
-        if (bitcoinWallet.nobleTaprootSigner && psbt.data.inputs.length === 1) {
-          const inputIndex = 0;
-          const xOnlyPubkey = bitcoinWallet.nobleTaprootSigner.publicKey;
-          const inputValue = utxos[0].satoshis;
-          const privateKey = bitcoinWallet.privkey!.privateKey as Buffer;
-          if (!privateKey) throw new Error("Private key is missing from wallet");
-          try {
-            const rawTxHex = await signTaprootInputWithNoble({
-              psbt,
-              inputIndex,
-              xOnlyPubkey,
-              inputValue,
-              privateKey,
-              network,
-            });
-            const blockstreamNetwork =
-              bitcoinNetwork === "livenet" || bitcoinNetwork === "mainnet"
-                ? "mainnet"
-                : "testnet";
-            const txId = await broadcastRawTxViaBlockstream(rawTxHex, blockstreamNetwork);
-            console.log('[sendBitcoinWithDerivedWallet] Broadcasted txid:', txId);
-            return txId;
-          } catch (e) {
-            console.error('[sendBitcoinWithDerivedWallet] Error in manual Taproot signing:', e);
-            throw e;
-          }
-        }
-        // Fallback to previous logic for other cases
-        if (bitcoinWallet.nobleTaprootSigner) {
-          // Debug: print key and script info
-          console.log('Signer publicKey:', bitcoinWallet.nobleTaprootSigner.publicKey.toString('hex'));
-          console.log('Input tapInternalKey:', psbt.data.inputs[0].tapInternalKey?.toString('hex'));
-          console.log('Input witnessUtxo.script:', psbt.data.inputs[0].witnessUtxo?.script.toString('hex'));
-          console.log('Expected script:', bitcoin.payments.p2tr({ internalPubkey: bitcoinWallet.nobleTaprootSigner.publicKey, network }).output?.toString('hex'));
-          // Try signing just the first input
-          try {
-            await psbt.signInputAsync(0, bitcoinWallet.nobleTaprootSigner);
-            console.log('[sendBitcoinWithDerivedWallet] Successfully signed input 0 with nobleTaprootSigner');
-          } catch (e) {
-            console.error('[sendBitcoinWithDerivedWallet] Error signing input 0 with nobleTaprootSigner:', e);
-          }
-          // Try signing all inputs
-          try {
-            await psbt.signAllInputsAsync(bitcoinWallet.nobleTaprootSigner);
-            console.log('[sendBitcoinWithDerivedWallet] Successfully signed all inputs with nobleTaprootSigner');
-          } catch (e) {
-            console.error('[sendBitcoinWithDerivedWallet] Error signing all inputs with nobleTaprootSigner:', e);
-            throw e;
-          }
-        } else if (bitcoinWallet.signer) {
-          // Fallback to legacy signer if nobleTaprootSigner is not present
-          try {
-            psbt.signAllInputs(bitcoinWallet.signer);
-            console.log('[sendBitcoinWithDerivedWallet] Successfully signed all inputs with custom signer');
-          } catch (e) {
-            console.error('[sendBitcoinWithDerivedWallet] Error signing all inputs with custom signer:', e);
-            throw e;
-          }
-        } else {
-          throw new Error('No valid Taproot signer found in derived Bitcoin wallet');
-        }
-        // Try to finalize and broadcast as before
-        try {
-          psbt.finalizeAllInputs();
-          const signedTxHex = psbt.extractTransaction().toHex();
-          console.log('[sendBitcoinWithDerivedWallet] Signed transaction hex:', signedTxHex);
+        // Debug signer and key before signing
+        console.log('Signer public key:', bitcoinWallet.signer?.publicKey?.toString('hex'));
+        console.log('Taproot input key (x-only):', userXOnlyPubKey.toString('hex'));
+        console.log('Signer has signSchnorr:', typeof bitcoinWallet.signer?.signSchnorr === 'function');
 
-          // 4. Broadcast using backend
+        // --- Taproot key-spend signing and broadcasting (bitcoinjs-lib best practice) ---
+        if (bitcoinWallet.privkeyHex && psbt.data.inputs.length === 1) {
+          const keyPair = ECPair.fromPrivateKey(Buffer.from(bitcoinWallet.privkeyHex, 'hex'), { compressed: true });
+          const keyPairForSigner = {
+            ...keyPair,
+            publicKey: Buffer.from(keyPair.publicKey), // ensure Buffer type
+            privateKey: keyPair.privateKey,            // explicitly assign privateKey
+            sign: (hash: Buffer) => Buffer.from(keyPair.sign(hash)),
+            signSchnorr: (hash: Buffer) => Buffer.from(keyPair.signSchnorr(hash)),
+          };
+          const tweakedSigner = tweakSigner(keyPairForSigner, { network });
+          psbt.signInput(0, tweakedSigner);
+          psbt.finalizeAllInputs();
+          const txHex = psbt.extractTransaction().toHex();
           const blockstreamNetwork =
             bitcoinNetwork === "livenet" || bitcoinNetwork === "mainnet"
               ? "mainnet"
               : "testnet";
-          const txId = await broadcastRawTxViaBlockstream(signedTxHex, blockstreamNetwork);
+          const txId = await broadcastRawTx(txHex, blockstreamNetwork);
           console.log('[sendBitcoinWithDerivedWallet] Broadcasted txid:', txId);
-          console.log('Returning txId after manual broadcast:', txId);
           return txId;
-        } catch (e) {
-          console.error('[sendBitcoinWithDerivedWallet] Error finalizing/signing transaction:', e);
-          throw e;
         }
+
+        throw new Error('No valid Taproot signer found in derived Bitcoin wallet');
       } catch (error) {
         console.error('[sendBitcoinWithDerivedWallet] Error:', error);
         if (error instanceof Error) {
