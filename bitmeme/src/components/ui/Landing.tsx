@@ -51,7 +51,7 @@ export default function Landing({
               Welcome to BitMeme
             </Text>
             <Text style={styles.subtitle}>
-              The easiest way to create, share, and discover memes on Solana.
+              The easiest way to create, mint, and tip creators using Bitcoin.
             </Text>
             <View style={styles.actionSection}>
               <View

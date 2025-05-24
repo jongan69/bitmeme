@@ -9,7 +9,7 @@ import Animated, { interpolate, useAnimatedRef, useAnimatedStyle, useScrollViewO
 import { useWalletOnboarding } from "@/hooks/useWallets";
 import { useSolanaPayment } from "@/hooks/misc/usePayment";
 import { useBitcoinWallet } from "@/contexts/BitcoinWalletProvider";
-import { useTable, useAddLikeCallback, useRemoveLikeCallback, useAddCommentCallback } from "@/stores/Memestore";
+import { useTable, useAddLikeCallback, useRemoveLikeCallback, useAddCommentCallback, forceSyncMemes } from "@/stores/Memestore";
 import { useUserIdAndNickname } from "@/hooks/useNickname";
 import { useStacks } from "@/contexts/StacksWalletProvider";
 import { useTipSettingsStore } from "@/stores/tipSettingsStore";
@@ -20,6 +20,14 @@ import { PublicKey } from "@solana/web3.js";
 import { InteractionType } from "@/types/api";
 import { Chain } from "@/types/network";
 import { BitcoinNetwork, SolanaNetwork, StacksNetwork } from "@/types/store";
+
+function MemesRefreshRegister() {
+  Form.useListRefresh(async () => {
+    console.log("refreshing");
+    await forceSyncMemes();
+  });
+  return null;
+}
 
 export default function Page() {
   const ref = useAnimatedRef();
@@ -105,8 +113,13 @@ export default function Page() {
   };
 
   return (
-    // @ts-ignore
-    <Form.List ref={ref} navigationTitle="Home" listStyle="grouped" >
+    <Form.List
+      // @ts-ignore
+      ref={ref}
+      navigationTitle="Home"
+      listStyle="grouped"
+    >
+      <MemesRefreshRegister />
       {process.env.EXPO_OS !== "web" && (
         <Stack.Screen
           options={{
@@ -273,7 +286,6 @@ export default function Page() {
           })}
         </View>
       )}
-
     </Form.List>
   );
 }

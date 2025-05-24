@@ -10,6 +10,8 @@ import { useCreateServerSynchronizerAndStart } from "@/stores/synchronization/us
 // import { useValuesCopy } from "@/hooks/useValuesCopy";
 import { useValue, useSetValueCallback, useValuesListener } from "tinybase/ui-react";
 import { debounce } from "lodash";
+import { createWsSynchronizer } from "tinybase/synchronizers/synchronizer-ws-client/with-schemas";
+import ReconnectingWebSocket from "reconnecting-websocket";
 
 const MEME_TABLE_SCHEMA = {
   memes: {
@@ -59,6 +61,14 @@ export { useTable };
 
 const STORE_ID = "memeStore";
 
+const SYNC_SERVER_URL = process.env.EXPO_PUBLIC_SYNC_SERVER_URL;
+
+let memeStoreInstance: any = null;
+
+export function getMemeStore() {
+  return memeStoreInstance;
+}
+
 // Add meme
 export const useAddMemeCallback = () => {
   const store = useStore(STORE_ID);
@@ -102,6 +112,7 @@ export default function MemeStore() {
   const store = useCreateMergeableStore(() =>
     createMergeableStore().setSchema(MEME_TABLE_SCHEMA, MEME_VALUES_SCHEMA)
   );
+  memeStoreInstance = store;
 
   // Debounce the setValuesCopy callback
   const debouncedSetValuesCopy = useCallback(
@@ -222,3 +233,18 @@ export const useValuesCopy = (): [string, (valuesCopy: string) => void] => [
     STORE_ID
   ),
 ];
+
+// Utility to force a sync (manual refresh)
+export async function forceSyncMemes() {
+  const store = getMemeStore();
+  if (!store || !SYNC_SERVER_URL) return;
+  const synchronizer = await createWsSynchronizer(
+    store,
+    new ReconnectingWebSocket(SYNC_SERVER_URL + STORE_ID, [], {
+      maxReconnectionDelay: 1000,
+      connectionTimeout: 1000,
+    })
+  );
+  await synchronizer.load();
+  await synchronizer.save();
+}
