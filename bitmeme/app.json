@@ -13,7 +13,8 @@
       "infoPlist": {
         "UIViewControllerBasedStatusBarAppearance": true,
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "bundleIdentifier": "com.jongan69.bitmeme"
     },
     "android": {
       "adaptiveIcon": {

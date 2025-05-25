@@ -12,12 +12,12 @@
     "export:web": "npx expo export -p web",
     "deploy:web": "eas deploy --prod",
     "update:mobile": "eas update --message 'Update mobile app' --channel production",
-    "knip": "knip"
+    "run-knip": "knip"
   },
   "dependencies": {
     "@bacons/apple-colors": "^0.0.8",
     "@bitcoinerlab/secp256k1": "^1.2.0",
-    "@clerk/clerk-expo": "^2.11.6",
+    "@clerk/clerk-expo": "^2.11.8",
     "@coral-xyz/borsh": "^0.31.1",
     "@expo-google-fonts/source-code-pro": "^0.3.0",
     "@expo/vector-icons": "^14.1.0",
@@ -32,14 +32,14 @@
     "@svgr/core": "^8.1.0",
     "@svgr/plugin-jsx": "^8.1.0",
     "@svgr/plugin-svgo": "^8.1.0",
-    "babel-plugin-react-compiler": "^19.0.0-beta-af1b7da-20250417",
+    "babel-plugin-react-compiler": "^19.0.0-beta-ebf51a3-20250411",
     "bitcoinjs-lib": "^6.1.7",
     "bn.js": "^5.2.2",
     "bs58": "^6.0.0",
     "c32check": "^2.0.0",
     "dayjs": "^1.11.13",
     "ecpair": "^3.0.0",
-    "eslint-plugin-react-compiler": "^19.1.0-rc.1",
+    "eslint-plugin-react-compiler": "^19.1.0-rc.1-rc-af1b7da-20250421",
     "expo": "53.0.9",
     "expo-application": "~6.1.4",
     "expo-blur": "~14.1.4",
@@ -58,20 +58,20 @@
     "expo-status-bar": "~2.2.3",
     "expo-symbols": "~0.4.4",
     "expo-system-ui": "~5.0.7",
-    "expo-updates": "~0.28.12",
+    "expo-updates": "~0.28.13",
     "expo-web-browser": "~14.1.6",
     "https-browserify": "^1.0.0",
-    "js-sha256": "^0.11.0",
+    "js-sha256": "^0.11.1",
     "lodash": "^4.17.21",
-    "openai": "^4.100.0",
-    "papaparse": "^5.5.2",
+    "openai": "^4.103.0",
+    "papaparse": "^5.5.3",
     "pbkdf2": "^3.1.2",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.2",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-qrcode-svg": "^6.3.15",
-    "react-native-reanimated": "~3.17.3",
+    "react-native-reanimated": "~3.17.5",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.10.0",
     "react-native-svg": "15.11.2",
@@ -87,25 +87,25 @@
     "tinybase": "6.1.1",
     "tweetnacl": "^1.0.3",
     "vaul": "^1.1.2",
-    "zod": "^3.24.4",
-    "zustand": "^5.0.4"
+    "zod": "^3.25.28",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.2",
+    "@babel/core": "^7.27.1",
     "@peculiar/webcrypto": "^1.5.0",
     "@types/bn.js": "^5.1.6",
-    "@types/lodash": "^4.17.16",
-    "@types/node": "^22.15.18",
+    "@types/lodash": "^4.17.17",
+    "@types/node": "^22.15.21",
     "@types/papaparse": "^5.3.16",
     "@types/pbkdf2": "^3.1.2",
-    "@types/react": "~19.0.10",
+    "@types/react": "~19.0.14",
     "@types/text-encoding": "^0.0.40",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.1",
-    "eslint": "^9.0.0",
+    "eslint": "^9.27.0",
     "eslint-config-expo": "~9.2.0",
     "expo-atlas": "^0.4.0",
-    "knip": "^5.56.0",
+    "knip": "^5.58.0",
     "process": "^0.11.10",
     "react-native-get-random-values": "^1.11.0",
     "readable-stream": "^4.7.0",
@@ -113,5 +113,15 @@
     "typescript": "^5.8.3"
   },
   "private": true,
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "listUnknownPackages": false,
+        "exclude": [
+          "@bacons/apple-colors"
+        ]
+      }
+    }
+  },
   "packageManager": "yarn@4.6.0+sha512.5383cc12567a95f1d668fbe762dfe0075c595b4bfff433be478dbbe24e05251a8e8c3eb992a986667c1d53b6c3a9c85b8398c35a960587fbd9fa3a0915406728"
 }
