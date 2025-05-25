@@ -30,8 +30,8 @@ jobs:
 
       - name: Install dependencies
         run: yarn install
-        working-directory: ./bitmeme/bitmeme
+        working-directory: ./bitmeme
 
       - name: Publish update
         run: eas update --auto
-        working-directory: ./bitmeme/bitmeme
+        working-directory: ./bitmeme
