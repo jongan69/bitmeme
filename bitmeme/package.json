@@ -13,7 +13,8 @@
     "deploy:web": "eas deploy --prod",
     "update:mobile": "eas update --message 'Update mobile app' --channel production",
     "run-knip": "knip",
-    "eas:env": "eas env:create"
+    "eas:env": "eas env:create",
+    "doc": "npx expo-doctor@latest"
   },
   "dependencies": {
     "@bacons/apple-colors": "^0.0.8",

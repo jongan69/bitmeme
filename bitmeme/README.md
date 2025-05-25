@@ -2,7 +2,7 @@
 
 BitMeme is a mobile app that empowers users to create hilarious, viral-ready memes using AI, and instantly tip their favorite memes with Bitcoin. BitMeme combines OpenAI's advanced language generation, the [memegen.link](https://memegen.link) API for meme image rendering, minted as NFTs on STX blockchain and Bitcoin, Solana and STX for micropayments.
 
-<a href="https://testflight.apple.com/join/GuWeVkXJ">
+<a href="https://testflight.apple.com/join/FhzSNKER">
 <img src="https://github.com/user-attachments/assets/491da8e3-ebb2-4b81-9585-82418a37f733" width="200px" />
 </a>
 

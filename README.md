@@ -2,6 +2,10 @@
 
 **Submission for Bitcoin 2025 Official Hackathon**
 
+<a href="https://testflight.apple.com/join/FhzSNKER">
+<img src="https://github.com/user-attachments/assets/491da8e3-ebb2-4b81-9585-82418a37f733" width="200px" />
+</a>
+
 ---
 
 ## Overview
