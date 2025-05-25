@@ -48,6 +48,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
@@ -62,7 +67,7 @@ jobs:
         # queries: security-extended,security-and-quality
 
     - name: Install dependencies
-      run: yarn install
+      run: bun install
       working-directory: ./bitmeme
 
     # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift).
