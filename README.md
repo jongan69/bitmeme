@@ -64,16 +64,16 @@ https://x.com/hexlok/status/1925474184408297629/video/1
 ## Code Repository
 https://github.com/jongan69/bitmeme
 
-## Live Preview (Optional)
-https://testflight.apple.com/join/FhzSNKER
+## Live Preview
+Mobile: https://testflight.apple.com/join/FhzSNKER
 
-https://bitmeme.expo.app/
+Web: https://bitmeme.expo.app/
 
 
 ---
 
 ## Team
-[Team member names, roles, and bios]
+https://www.linkedin.com/in/jongan69/
 
 ---
 
