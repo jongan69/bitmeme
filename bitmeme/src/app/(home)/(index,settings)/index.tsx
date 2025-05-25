@@ -182,7 +182,7 @@ export default function Page() {
                     height: 220,
                     borderRadius: 12,
                     marginBottom: 12,
-                    backgroundColor: "#f0f0f0",
+                    backgroundColor: "#150C1F",
                   }}
                   resizeMode="contain"
                 />
