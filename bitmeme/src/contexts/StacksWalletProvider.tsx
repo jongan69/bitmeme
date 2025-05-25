@@ -16,10 +16,12 @@ import { setLocalStorage, getLocalStorage } from "@/utils/localStorage";
 import * as stacksTransactions from '@stacks/transactions';
 import { notifyError } from "@/utils/notification";
 import { Platform } from "react-native";
-import { c32address } from 'c32check';
-import { getPublicKey as nobleGetPublicKey } from '@noble/secp256k1';
-import { ripemd160 } from '@noble/hashes/legacy';
-import { sha256 } from '@noble/hashes/sha2';
+
+// Web only
+// import { c32address } from 'c32check';
+// import { getPublicKey as nobleGetPublicKey } from '@noble/secp256k1';
+// import { ripemd160 } from '@noble/hashes/legacy';
+// import { sha256 } from '@noble/hashes/sha2';
 
 type StacksContextType = {
     mnemonic: string;
@@ -70,29 +72,30 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
             }
             // Works on Web, but not confident in logic, would prefer the above
             // Also does not return in the format the logic below expects
-            if (Platform.OS === "web") {
-                const pubKeyHex = nobleGetPublicKey(stxPrivateKey, true);
-                console.log("[DEBUG] pubKeyHex:", pubKeyHex);
-                const pubKeyBytes = typeof pubKeyHex === 'string'
-                    ? Uint8Array.from((pubKeyHex as string).match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)))
-                    : pubKeyHex;
-                console.log("[DEBUG] pubKeyBytes:", pubKeyBytes);
-                const sha = sha256.create().update(pubKeyBytes).digest();
-                console.log("[DEBUG] sha:", sha);
-                const hash160 = ripemd160.create().update(sha).digest();
-                console.log("[DEBUG] hash160:", hash160);
-                const hash160Hex = Array.from(hash160).map(b => b.toString(16).padStart(2, '0')).join('');
-                console.log("hash160Hex:", hash160Hex, "length:", hash160Hex.length);
-                console.log("typeof hash160Hex:", typeof hash160Hex);
-                console.log("versionBytes:", versionBytes);
-                stxAddress = c32address(versionBytes, hash160Hex);
-                console.log("[DEBUG] stxAddress:", stxAddress);
-                if (stxPrivateKey) {
-                    wallet = {
-                        accounts: [{ stxPrivateKey }],
-                    };
-                }
-            }
+            // ALSO BREAKS BUILD?
+            // if (Platform.OS === "web") {
+            //     const pubKeyHex = nobleGetPublicKey(stxPrivateKey, true);
+            //     console.log("[DEBUG] pubKeyHex:", pubKeyHex);
+            //     const pubKeyBytes = typeof pubKeyHex === 'string'
+            //         ? Uint8Array.from((pubKeyHex as string).match(/.{1,2}/g)!.map(byte => parseInt(byte, 16)))
+            //         : pubKeyHex;
+            //     console.log("[DEBUG] pubKeyBytes:", pubKeyBytes);
+            //     const sha = sha256.create().update(pubKeyBytes).digest();
+            //     console.log("[DEBUG] sha:", sha);
+            //     const hash160 = ripemd160.create().update(sha).digest();
+            //     console.log("[DEBUG] hash160:", hash160);
+            //     const hash160Hex = Array.from(hash160).map(b => b.toString(16).padStart(2, '0')).join('');
+            //     console.log("hash160Hex:", hash160Hex, "length:", hash160Hex.length);
+            //     console.log("typeof hash160Hex:", typeof hash160Hex);
+            //     console.log("versionBytes:", versionBytes);
+            //     stxAddress = c32address(versionBytes, hash160Hex);
+            //     console.log("[DEBUG] stxAddress:", stxAddress);
+            //     if (stxPrivateKey) {
+            //         wallet = {
+            //             accounts: [{ stxPrivateKey }],
+            //         };
+            //     }
+            // }
             console.log("wallet:", wallet?.accounts[0]?.stxPrivateKey);
 
             setMnemonic(mnemonic);
