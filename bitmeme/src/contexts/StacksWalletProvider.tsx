@@ -177,7 +177,9 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    // NFT minting function (update contract details as needed)
+    // NFT minting function 
+    // DOES NOT WORK ON WEB, makeContractCall PROBABLY USES getAddressFromPrivateKey UNDER THE HOOD WHICH AS SHOWN ABOVE IS NOT WORKING ON WEB
+    // LIKELY CAUSED BY EXPO WEB METRO POLYFILLS NOT ALIGNING WITH DEFAULT WEB
     const mintNFT = async (metadataUri?: string) => {
         console.log("mintNFT called", { metadataUri });
         try {
