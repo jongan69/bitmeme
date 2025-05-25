@@ -6,24 +6,24 @@ import {
   PersistentActions,
   PersistentState,
   SolanaNetwork,
-  SolanaRpcProvider,
 } from "@/types/store";
+
+const bitcoinNetwork = process.env.EXPO_PUBLIC_BITCOIN_NETWORK === "testnet" ? BitcoinNetwork.Testnet : BitcoinNetwork.Mainnet;
+const solanaNetwork = process.env.EXPO_PUBLIC_SOLANA_NETWORK === "devnet" ? SolanaNetwork.Devnet : SolanaNetwork.Mainnet;
+
 
 const usePersistentStore = create<PersistentState & PersistentActions>()(
   persist(
     (set) => ({
       // States
-      solanaNetwork: SolanaNetwork.Devnet,
-      bitcoinNetwork: BitcoinNetwork.Testnet,
-      solanaRpcProvider: SolanaRpcProvider.Zeus,
+      solanaNetwork: solanaNetwork,
+      bitcoinNetwork: bitcoinNetwork,
 
       // Actions
       setSolanaNetwork: (network: SolanaNetwork) =>
         set({ solanaNetwork: network }),
       setBitcoinNetwork: (network: BitcoinNetwork) =>
         set({ bitcoinNetwork: network }),
-      setSolanaRpcProvider: (provider: SolanaRpcProvider) =>
-        set({ solanaRpcProvider: provider }),
     }),
     {
       name: "bitmeme",

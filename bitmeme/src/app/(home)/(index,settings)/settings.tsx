@@ -37,16 +37,19 @@ import { useHoldings } from "@/hooks/misc/useHoldings";
 import { useMultiAirdrop } from "@/hooks/useMultiAirdrop";
 import { useBtcBalanceSats } from "@/hooks/misc/useBtcBalanceSats";
 
-// Icons and SVGs
+// Graphics
 import Icon from "@/components/ui/Icons";
 import TwitterSvg from "@/svg/twitter.svg";
-
+import BitmemeLogo from "@/images/logo.png";
+import headerLogo from "@/images/headerlogo.png";
 // Utils
 import { notifyError, notifySuccess } from "@/utils/notification";
 import { PublicKey } from "@solana/web3.js";
 
 // Types
 import { SolanaNetwork, BitcoinNetwork } from "@/types/store";
+
+const isDev = process.env.EXPO_PUBLIC_SOLANA_NETWORK === "devnet";
 
 function Switches({ autoTipOn, setAutoTipOn }: { autoTipOn: boolean; setAutoTipOn: (value: boolean) => void }) {
   return (
@@ -67,7 +70,7 @@ const BalancesSection = memo(function BalancesSection({
   balance,
   nativeBalance,
   spendableUTXOs,
-  gravatarUri,
+  image,
 }: {
   stacksAddress: string;
   solanaAddress: string;
@@ -76,13 +79,13 @@ const BalancesSection = memo(function BalancesSection({
   balance: any;
   nativeBalance: any;
   spendableUTXOs: any;
-  gravatarUri: string;
+  image: string;
 }) {
   return (
     <Form.Section>
       <View style={{ alignItems: "center", gap: 8, padding: 16, flex: 1, width: '100%' }}>
         <Image
-          source={{ uri: gravatarUri }}
+          source={image}
           style={{
             aspectRatio: 1,
             height: 64,
@@ -153,10 +156,10 @@ export default function Page() {
   const { data: balance, mutate, isValidating: isStacksValidating } = useStacksBalance(stacksAddress || "");
 
   // Memoize gravatar URI
-  const gravatarUri = useMemo(
-    () => `https://www.gravatar.com/avatar/${bitcoinAddress || ''}?s=250`,
-    [bitcoinAddress]
-  );
+  // const gravatarUri = useMemo(
+  //   () => `https://www.gravatar.com/avatar/${bitcoinAddress || ''}?s=250`,
+  //   [bitcoinAddress]
+  // );
 
   // Memoize PublicKey to prevent infinite loop in useHoldings
   const publicKey = useMemo(
@@ -170,13 +173,6 @@ export default function Page() {
   const nativeBalance = holdingsResult.nativeBalance;
   const refetchNativeBalance = holdingsResult.refetch;
   const isSolLoading = holdingsResult.loading;
-  // const { data: bitcoinUTXOs, mutate: refetchBitcoinUTXOs, isLoading: isBitcoinLoading } = useBitcoinUTXOs(bitcoinAddress ?? null);
-
-  // const [spendableUTXOs, setSpendableUTXOs] = useState(() => estimateMaxSpendableAmount(bitcoinUTXOs ?? [], feeRate));
-
-  // useEffect(() => {
-  //   setSpendableUTXOs(estimateMaxSpendableAmount(bitcoinUTXOs ?? [], feeRate));
-  // }, [bitcoinUTXOs, feeRate]);
 
   const { signOut } = useClerk();
 
@@ -192,7 +188,7 @@ export default function Page() {
   const hasHydrated = useTipSettingsStore.persist?.hasHydrated();
 
   const [showBalances, setShowBalances] = useState(false);
-  const [showRpcStatus, setShowRpcStatus] = useState(false);
+  const [, setShowRpcStatus] = useState(false);
   const [show, setShow] = React.useState(false);
 
   // MultiAirdrop hook
@@ -207,8 +203,8 @@ export default function Page() {
 
   // Change handleShowBalances to:
   const handleShowBalances = useCallback(() => {
-    if (!showBalances) {
-      setShowBalances(true);
+    setShowBalances(!showBalances);
+    if (showBalances) {
       refreshBalances();
     }
   }, [showBalances, refreshBalances]);
@@ -307,7 +303,7 @@ export default function Page() {
                     ]}
                   >
                     <Image
-                      source={{ uri: gravatarUri }}
+                      source={headerLogo}
                       style={[
                         {
                           aspectRatio: 1,
@@ -325,17 +321,18 @@ export default function Page() {
                         fontWeight: "bold",
                       }}
                     >
-                      {bitcoinAddress ?? 'Loading...'}
+                      BitMeme
                     </Text>
                   </Animated.View>
                 );
               }
               return (
                 <Animated.Image
-                  source={{ uri: gravatarUri }}
+                  source={headerLogo}
                   style={[
                     style,
                     {
+                      marginBottom: 6,
                       aspectRatio: 1,
                       height: 30,
                       borderRadius: 8,
@@ -352,7 +349,11 @@ export default function Page() {
         <Form.List ref={ref} navigationTitle="Settings">
           {/* Show Balances Button and Section */}
           <Form.Section>
-            <Button title="Show Balances" onPress={handleShowBalances} disabled={isRefreshingBalances} />
+            <Button
+              title={showBalances ? "Hide Balances" : "Show Balances"}
+              onPress={handleShowBalances}
+              disabled={isRefreshingBalances}
+            />
           </Form.Section>
           {showBalances && (
             <BalancesSection
@@ -363,25 +364,25 @@ export default function Page() {
               balance={balance}
               nativeBalance={nativeBalance}
               spendableUTXOs={btcBalance}
-              gravatarUri={gravatarUri}
+              image={BitmemeLogo}
             />
           )}
-          <Form.Section>
+          {isDev && <Form.Section>
             <Button
               title={airdropLoading ? "Requesting Airdrops..." : "Request Airdrops"}
               onPress={handleAirdrop}
               disabled={airdropLoading}
             />
             {airdropResults.length > 0 && (
-              <View style={{ marginTop: 12 }}>
+              <View style={{ marginTop: 12, }}>
                 {airdropResults.map((result) => (
-                  <Text key={result.address + result.type}>
+                  <Text key={result.address + result.type} style={{ color: AC.systemBlue }}>
                     {result.type.toUpperCase()} {result.address}: {result.status}
                   </Text>
                 ))}
               </View>
             )}
-          </Form.Section>
+          </Form.Section>}
           <Form.Section title="Data">
             <Form.Text
               onPress={() => {
@@ -460,15 +461,18 @@ export default function Page() {
             )}
             {/* Show RPC Status Button and Section */}
 
-            {!rpcChecking && !rpcConnected && <Button title="Check RPC Status" onPress={checkRpcConnection} disabled={rpcChecking} />}
+            {/* <View style={{ justifyContent: "center", alignSelf: "center" }}>
+              {!rpcChecking && !rpcConnected && }
+            </View> */}
 
-            {showRpcStatus && (
+            
               <RpcStatusSection
                 rpcConnected={rpcConnected}
                 rpcChecking={rpcChecking}
                 onRefresh={checkRpcConnection}
               />
-            )}
+          
+
             <ContentUnavailable
               title="Bitcoin Wallet"
               systemImage="banknote"
@@ -479,6 +483,9 @@ export default function Page() {
 
           <Form.Section title="App Info">
             <Form.Text hint="BitMeme v1.0">Version</Form.Text>
+            <Form.Text hint={`${process.env.EXPO_PUBLIC_BITCOIN_NETWORK}`}>Bitcoin Network</Form.Text>
+            <Form.Text hint={`${process.env.EXPO_PUBLIC_SOLANA_NETWORK}`}>Solana Network</Form.Text>
+            <Form.Text hint={`${process.env.EXPO_PUBLIC_STACKS_NETWORK}`}>Stacks Network</Form.Text>
             <Form.Text hint="0">Sats Tipped</Form.Text>
 
             <FormExpandable

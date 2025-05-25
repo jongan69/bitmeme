@@ -14,19 +14,12 @@ export enum StacksNetwork {
   Mainnet = "mainnet",
 }
 
-export enum SolanaRpcProvider {
-  Zeus,
-  Custom,
-}
-
 export type PersistentState = {
   solanaNetwork: SolanaNetwork;
   bitcoinNetwork: BitcoinNetwork;
-  solanaRpcProvider: SolanaRpcProvider;
 };
 
 export type PersistentActions = {
   setSolanaNetwork: (network: SolanaNetwork) => void;
   setBitcoinNetwork: (network: BitcoinNetwork) => void;
-  setSolanaRpcProvider: (provider: SolanaRpcProvider) => void;
 };

@@ -73,6 +73,13 @@ export interface BitcoinWalletContextState {
   setConnectorId: (connectorId?: string) => void;
   handleConnectorId: (connectorId: string) => Promise<void>;
   connectorId: string | undefined;
+  exportDerivedWalletPrivateKey: () => string;
+}
+
+const rpcUrl = process.env.EXPO_PUBLIC_BITCOIN_NETWORK === "testnet" ?  process.env.EXPO_PUBLIC_BITCOIN_TESTNET_RPC : process.env.EXPO_PUBLIC_BITCOIN_MAINNET_RPC;
+
+if(!rpcUrl) {
+  throw new Error("Bitcoin RPC URL is not set: " + process.env.EXPO_PUBLIC_BITCOIN_NETWORK + " " + process.env.EXPO_PUBLIC_BITCOIN_TESTNET_RPC + " " + process.env.EXPO_PUBLIC_BITCOIN_MAINNET_RPC);
 }
 
 const BitcoinWalletContext = createContext<BitcoinWalletContextState | null>(
@@ -81,7 +88,10 @@ const BitcoinWalletContext = createContext<BitcoinWalletContextState | null>(
 
 export async function fetchDynamicFeeRate() {
   try {
-    const response = await fetch("https://warmhearted-morning-cherry.btc-testnet.quiknode.pro/", {
+    if(!rpcUrl) {
+      throw new Error("Bitcoin RPC URL is not set");
+    }
+    const response = await fetch(rpcUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: 1, jsonrpc: "2.0", method: "estimatesmartfee", params: [10] }),
@@ -587,6 +597,13 @@ export function BitcoinWalletProvider({ children }: { children: ReactNode }) {
     [bitcoinWallet, bitcoinWalletType, bitcoinNetwork, sending]
   );
 
+  const exportDerivedWalletPrivateKey = useCallback(() => {
+    if (bitcoinWalletType === "solana" && bitcoinWallet?.privkeyHex) {
+      return bitcoinWallet.privkeyHex;
+    }
+    throw new Error("No derived wallet private key available");
+  }, [bitcoinWallet, bitcoinWalletType]);
+
   return (
     <BitcoinWalletContext.Provider
       value={{
@@ -618,6 +635,7 @@ export function BitcoinWalletProvider({ children }: { children: ReactNode }) {
         setConnectorId,
         handleConnectorId,
         connectorId,
+        exportDerivedWalletPrivateKey,
       }}
     >
       {children}

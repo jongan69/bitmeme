@@ -13,12 +13,12 @@ import { BigNumber } from "bignumber.js";
  */
 const fetchStacksBalance = async (address: string | null): Promise<BigNumber> => {
   if (!address) return new BigNumber(0);
-  const url = `https://api.testnet.hiro.so/extended/v1/address/${address}/stx`;
+  const url = process.env.EXPO_PUBLIC_STACKS_NETWORK === "testnet" ? `https://api.testnet.hiro.so/extended/v1/address/${address}/stx` : `https://api.hiro.so/extended/v2/addresses/${address}/balances/stx?include_mempool=false`;
   const res = await fetch(url);
   if (!res.ok) throw new Error("Failed to fetch STX balance");
   const data = await res.json();
   // The balance is in micro-STX (1 STX = 1_000_000 micro-STX)
-  return new BigNumber(data.balance);
+  return new BigNumber(data.balance / 1_000_000);
 };
 
 const useStacksBalance = (address: string | null) => {

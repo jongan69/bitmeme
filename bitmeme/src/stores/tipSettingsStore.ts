@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { zustandCustomStorage } from "@/utils/zustandCustomStorage";
 
 export type TipSettingsState = {
   tipCurrency: string;
@@ -22,7 +23,7 @@ export const useTipSettingsStore = create<TipSettingsState>()(
     }),
     {
       name: "tip-settings-store",
-      // Optionally, customize storage for SecureStore if needed
+      storage: createJSONStorage(() => zustandCustomStorage),
     }
   )
 ); 

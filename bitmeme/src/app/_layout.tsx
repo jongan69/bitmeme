@@ -10,8 +10,6 @@ import {
 import { SystemBars } from "react-native-edge-to-edge";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Toast, { BaseToast } from 'react-native-toast-message';
-import TouchableBounce from "@/components/ui/TouchableBounce";
-import * as WebBrowser from "expo-web-browser";
 
 // Components
 import { AsyncFont } from "@/components/data/async-font";

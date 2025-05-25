@@ -11,7 +11,7 @@ import { generateMnemonic, mnemonicToSeed } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english';
 import { Wallet } from "@stacks/wallet-sdk";
 import { HDKey } from "@scure/bip32";
-import { STACKS_TESTNET } from "@stacks/network";
+import { STACKS_MAINNET, STACKS_TESTNET } from "@stacks/network";
 import { setLocalStorage, getLocalStorage } from "@/utils/localStorage";
 import * as stacksTransactions from '@stacks/transactions';
 import { notifyError } from "@/utils/notification";
@@ -33,6 +33,7 @@ type StacksContextType = {
     loadWalletFromLocalStorage: () => Promise<void>;
     tipUser: (recipient: string, amount: bigint, memo?: string) => Promise<string | undefined>;
     mintNFT: (metadataUri?: string) => Promise<string | undefined>;
+    exportPrivateKey: () => string | null;
 };
 
 const StacksContext = createContext<StacksContextType | undefined>(undefined);
@@ -42,9 +43,9 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
     const [wallet, setWallet] = useState<Wallet | null>(null);
     const [address, setAddress] = useState<string | null>(null);
     const [log, setLog] = useState("");
-    const network = STACKS_TESTNET; // Change to STACKS_TESTNET if needed
+    const network = process.env.EXPO_PUBLIC_STACKS_NETWORK === "testnet" ? STACKS_TESTNET : STACKS_MAINNET; // Change to STACKS_TESTNET if needed
     // 26 for TESTNET, 22 for MAINNET
-    const versionBytes = network === STACKS_TESTNET ? 26 : 22;
+    // const versionBytes = network === STACKS_TESTNET ? 26 : 22;
 
     const generateStxWallet = async () => {
         console.log("Generating Stacks wallet (BIP39 mnemonic)");
@@ -223,6 +224,14 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
         };
     }
 
+    // Function to export the wallet's private key
+    const exportPrivateKey = () => {
+        if (wallet && wallet.accounts && wallet.accounts[0] && wallet.accounts[0].stxPrivateKey) {
+            return wallet.accounts[0].stxPrivateKey;
+        }
+        return null;
+    };
+
     return (
         <StacksContext.Provider
             value={{
@@ -235,6 +244,7 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
                 loadWalletFromLocalStorage,
                 tipUser,
                 mintNFT,
+                exportPrivateKey,
             }}
         >
             {children}
