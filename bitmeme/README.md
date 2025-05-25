@@ -1,5 +1,9 @@
 # BitMeme – AI-Powered Meme Generator with Crypto Tipping
 
+[![EAS Update](https://github.com/jongan69/bitmeme/actions/workflows/update.yml/badge.svg)](https://github.com/jongan69/bitmeme/actions/workflows/update.yml)
+
+[![CodeQL](https://github.com/jongan69/bitmeme/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/jongan69/bitmeme/actions/workflows/codeql.yml)
+
 BitMeme is a mobile app that empowers users to create hilarious, viral-ready memes using AI, and instantly tip their favorite memes with Bitcoin. BitMeme combines OpenAI's advanced language generation, the [memegen.link](https://memegen.link) API for meme image rendering, minted as NFTs on STX blockchain and Bitcoin, Solana and STX for micropayments.
 
 <a href="https://testflight.apple.com/join/FhzSNKER">

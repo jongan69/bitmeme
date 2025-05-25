@@ -94,6 +94,11 @@ bunx expo install
 
 ---
 
+[![jongan69 - bitmeme](https://img.shields.io/static/v1?label=jongan69&message=bitmeme&color=blue&logo=github)](https://github.com/jongan69/bitmeme "Go to GitHub repo")
+[![GitHub tag](https://img.shields.io/github/tag/jongan69/bitmeme?include_prereleases=&sort=semver&color=blue)](https://github.com/jongan69/bitmeme/releases/)
+[![issues - bitmeme](https://img.shields.io/github/issues/jongan69/bitmeme)](https://github.com/jongan69/bitmeme/issues)
+[![stars - bitmeme](https://img.shields.io/github/stars/jongan69/bitmeme?style=social)](https://github.com/jongan69/bitmeme)
+
 ## License
 
 MIT
