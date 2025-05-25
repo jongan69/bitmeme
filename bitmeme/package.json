@@ -10,7 +10,7 @@
     "lint": "expo lint",
     "tunnel": "npx expo start --tunnel -c",
     "export:web": "npx expo export -p web",
-    "deploy:web": "eas deploy --prod",
+    "deploy:web": "run eas deploy --prod",
     "update:mobile": "eas update --message 'Update mobile app' --channel production",
     "run-knip": "knip",
     "eas:env": "eas env:create",

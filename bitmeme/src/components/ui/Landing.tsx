@@ -40,7 +40,7 @@ export default function Landing({
       headerBackgroundColor={{ light: '#0F0F12', dark: '#0F0F12' }}
       headerImage={
         <Image
-          source={require('../../../assets/images/logo.png')}
+          source={require('../../../assets/images/icon.png')}
           style={styles.logo}
         />
       }>
