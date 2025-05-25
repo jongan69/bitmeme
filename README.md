@@ -59,13 +59,16 @@ BitMeme solves these problems by:
 ---
 
 ## Demo Video
-[Link to 3-5 min demo video goes here]
+https://x.com/hexlok/status/1925474184408297629/video/1
 
 ## Code Repository
-[GitHub repo link goes here]
+https://github.com/jongan69/bitmeme
 
 ## Live Preview (Optional)
-[Live app link goes here]
+https://testflight.apple.com/join/FhzSNKER
+
+https://bitmeme.expo.app/
+
 
 ---
 
