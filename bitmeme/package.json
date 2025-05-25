@@ -12,7 +12,8 @@
     "export:web": "npx expo export -p web",
     "deploy:web": "eas deploy --prod",
     "update:mobile": "eas update --message 'Update mobile app' --channel production",
-    "run-knip": "knip"
+    "run-knip": "knip",
+    "eas:env": "eas env:create"
   },
   "dependencies": {
     "@bacons/apple-colors": "^0.0.8",
@@ -22,6 +23,7 @@
     "@expo-google-fonts/source-code-pro": "^0.3.0",
     "@expo/vector-icons": "^14.1.0",
     "@noble/hashes": "^1.8.0",
+    "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-native-masked-view/masked-view": "0.3.2",
     "@react-native-segmented-control/segmented-control": "2.5.7",
     "@shopify/flash-list": "1.7.6",

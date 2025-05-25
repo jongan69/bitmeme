@@ -1,5 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
- 
+
 import * as bitcoin from "bitcoinjs-lib";
 
 import {
@@ -153,7 +153,7 @@ export function BitcoinWalletProvider({ children }: { children: ReactNode }) {
   const bitcoinNetwork = usePersistentStore((state: { bitcoinNetwork: any; }) => state.bitcoinNetwork);
   const { publicKey: solanaPubkey, signMessage: solanaSignMessage } = useSolanaWallet();
   const [bitcoinWallet, setBitcoinWallet] = useState<BitcoinWallet | null>(
-    null  
+    null
   );
   const [connecting, setConnecting] = useState(false);
   const [connected, setConnected] = useState(false);

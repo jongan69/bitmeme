@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
@@ -41,9 +42,8 @@ export const getLocalStorage = async <T>(key: string, secure = false): Promise<T
     } else {
       if (secure) {
         item = await SecureStore.getItemAsync(key);
-        console.log('[getLocalStorage] secure item:', item);
       } else {
-        item = localStorage.getItem(key);
+        item = await AsyncStorage.getItem(key);
       }
     }
     if (!item) return null;
@@ -87,7 +87,7 @@ export const setLocalStorage = async <T>(
       if (secure) {
         await SecureStore.setItemAsync(key, itemString);
       } else {
-        localStorage.setItem(key, itemString);
+        await AsyncStorage.setItem(key, itemString);
       }
     }
   } catch (error) {

@@ -83,11 +83,12 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
 
             setMnemonic(mnemonic);
             setWallet(wallet as any);
-            setLocalStorage("stx-wallet", wallet);
-            setLocalStorage("stx-mnemonic", mnemonic);
+            setLocalStorage("stx-wallet", wallet, true);
+            setLocalStorage("stx-mnemonic", mnemonic, true);
             setAddress(stxAddress);
             setLog("Wallet generated successfully!");
         } catch (err: any) {
+
             console.error("Error in generateStxWallet:", err);
             setLog(`Stacks wallet generation error: ${err.message || err}`);
         }
@@ -95,15 +96,17 @@ export const StacksProvider = ({ children }: { children: React.ReactNode }) => {
 
     const loadWalletFromLocalStorage = async () => {
         try {
-            const storedWallet = await getLocalStorage<Wallet>("stx-wallet");
-            if (!storedWallet) throw new Error("No wallet found in local storage");
-            // console.log("storedWallet:", storedWallet);
+            const storedWallet = await getLocalStorage<Wallet>("stx-wallet", true);
+            if (!storedWallet) { 
+                console.log("No wallet found in local storage, generating new wallet");
+                await generateStxWallet();
+                return;
+            }
             setWallet(storedWallet);
             const stxAddress = getAddressFromPrivateKey(
                 storedWallet.accounts[0].stxPrivateKey,
                 network
             );
-            // console.log("stxAddress:", stxAddress);
             setAddress(stxAddress);
             setLog("Stacks wallet loaded from local storage!");
         } catch (err: any) {

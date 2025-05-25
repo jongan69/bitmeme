@@ -21,7 +21,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#000000"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.jongan69.bitmeme"
     },
     "web": {
       "output": "server",
@@ -57,9 +58,7 @@
       },
       "router": {}
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/a2ddc42a-a392-408a-91a1-ef80779c475d"
     }

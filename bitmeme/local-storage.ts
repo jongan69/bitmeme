@@ -1,3 +1,4 @@
+// This seems to break in the web build, so we're not using it.
 import { Storage } from "expo-sqlite/kv-store";
 
 // localStorage polyfill. Life's too short to not have some storage API.

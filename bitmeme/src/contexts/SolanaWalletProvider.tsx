@@ -11,14 +11,15 @@ export class WalletService {
     const newWallet = Keypair.generate();
     await setLocalStorage(
       this.WALLET_KEY,
-      Buffer.from(newWallet.secretKey).toString('base64')
+      Buffer.from(newWallet.secretKey).toString('base64'),
+      true
     );
     this.currentWallet = newWallet;
     return newWallet;
   }
 
   static async loadWallet(): Promise<Keypair | null> {
-    const savedWallet = await getLocalStorage<string>(this.WALLET_KEY);
+    const savedWallet = await getLocalStorage<string>(this.WALLET_KEY, true);
     if (!savedWallet) {
       return null;
     }
@@ -28,7 +29,7 @@ export class WalletService {
   }
 
   static async deleteWallet(): Promise<void> {
-    await removeLocalStorage(this.WALLET_KEY);
+    await removeLocalStorage(this.WALLET_KEY, true);
     this.currentWallet = null;
   }
 

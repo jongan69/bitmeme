@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useStacks } from "@/contexts/StacksWalletProvider";
 
 export function useWalletOnboarding(onReady?: () => void) {
-    const { connectConnectorWallet, connectors, connectDerivedWallet, wallet: bitcoinWallet } = useBitcoinWallet();
+    const { connectDerivedWallet, wallet: bitcoinWallet } = useBitcoinWallet();
     const { login, publicKey } = useSolanaWallet();
     const { address: stacksAddress, loadWalletFromLocalStorage } = useStacks();
     const [loading, setLoading] = useState(true);

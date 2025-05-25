@@ -1,5 +1,4 @@
 import { getRandomValues as expoCryptoGetRandomValues } from "expo-crypto";
-import './local-storage'
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 global.Buffer = require('buffer').Buffer;
