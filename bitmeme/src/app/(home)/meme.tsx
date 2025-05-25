@@ -7,7 +7,7 @@ import { useAddMemeCallback } from "@/stores/Memestore";
 import { InteractionType } from "@/types/api";
 import { Chain } from "@/types/network";
 import { StacksNetwork } from "@/types/store";
-import { notifyError, notifySuccess, notifyTx } from "@/utils/notification";
+import { notifyError, notifyTx, notifyWarning } from "@/utils/notification";
 import Constants from "expo-constants";
 import { fetch } from "expo/fetch";
 import React, { useState } from "react";
@@ -133,8 +133,13 @@ export default function MemeGenerator() {
     console.log("Bitcoin address: ", bitcoinAddress);
     console.log("Stacks address: ", stacksAddress);
     try {
+      if(Platform.OS !== "web") {
       const txid = await mintNftWithImageUrl(url);
       console.log("Minted NFT with txid: ", txid);
+      notifyTx(true, { chain: Chain.Stacks, type: InteractionType.MintNFT, txId: txid, network: StacksNetwork.Testnet });
+      } else {
+        notifyWarning("Minting NFT is not supported on web, posting meme.");
+      }
       addMeme({
         caption,
         postUrl: url,
@@ -142,7 +147,7 @@ export default function MemeGenerator() {
         bitcoinAddress: bitcoinAddress!,
         stacksAddress: stacksAddress!,
       });
-      notifyTx(true, { chain: Chain.Stacks, type: InteractionType.MintNFT, txId: txid, network: StacksNetwork.Testnet });
+     
       // notifySuccess("Meme minted on STX!\nCaption: " + caption);
       setSelectedMeme(null);
       setCaption("");

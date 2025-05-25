@@ -48,7 +48,7 @@ export default function Page() {
   const memes = useTable("memes", "memeStore");
   const likes = useTable("likes", "memeStore");
   const comments = useTable("comments", "memeStore");
-  const memeList = Object.values(memes ?? {}) as Array<{
+  const memeList = (Object.values(memes ?? {}) as Array<{
     id: string;
     caption: string;
     postUrl: string;
@@ -56,7 +56,7 @@ export default function Page() {
     solanaAddress?: string;
     bitcoinAddress?: string;
     stacksAddress?: string;
-  }>;
+  }>).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   const [expandedMemeId, setExpandedMemeId] = React.useState<string | null>(null);
   const [commentInputs, setCommentInputs] = React.useState<{ [memeId: string]: string }>({});
 
