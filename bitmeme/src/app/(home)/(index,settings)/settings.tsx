@@ -74,7 +74,8 @@ export default function Page() {
 
   // Use memoized publicKey in useHoldings
   const holdingsResult = publicKey ? useHoldings(publicKey) : { nativeBalance: { lamports: 0 }, refetch: () => { }, loading: false };
-  const { balance: btcBalance, loading: btcLoading, error: btcError, refresh: btcRefresh } = useBtcBalanceSats(bitcoinAddress ?? null, BitcoinNetwork.Testnet);
+
+  const { balance: btcBalance, loading: btcLoading, error: btcError, refresh: btcRefresh } = useBtcBalanceSats(bitcoinAddress ?? null, appNetwork === "mainnet" ? "mainnet" : "testnet");
   const nativeBalance = holdingsResult.nativeBalance;
   const refetchNativeBalance = holdingsResult.refetch;
   const isSolLoading = holdingsResult.loading;

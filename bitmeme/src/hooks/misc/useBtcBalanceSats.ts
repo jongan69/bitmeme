@@ -28,13 +28,14 @@ export function useBtcBalanceSats(address: string | null | undefined, network: "
   const [refreshIndex, setRefreshIndex] = useState(0);
 
   const refresh = () => setRefreshIndex((i) => i + 1);
+  const url = network === "mainnet" ? "https://mempool.space/api/address/" : "https://mempool.space/testnet/api/address/";
 
   useEffect(() => {
     if (!address) return;
     setLoading(true);
     setError(null);
     setBalance(null);
-    fetch(`https://mempool.space/${network}/api/address/${address}`)
+    fetch(`${url}${address}`)
       .then((res) => {
         if (!res.ok) throw new Error('Failed to fetch BTC balance');
         return res.json();
