@@ -222,7 +222,7 @@ export const UnifiedWalletProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     (async () => {
-      const savedMnemonic = await getLocalStorage<string>("wallet_mnemonic", true); // use secure storage
+      const savedMnemonic = await getLocalStorage<string>(`wallet_mnemonic_${appNetwork}`, true); // use secure storage
       if (savedMnemonic) {
         console.log("Mnemonic found, loading wallets");
         setMnemonic(savedMnemonic);
@@ -232,7 +232,7 @@ export const UnifiedWalletProvider: React.FC<{ children: React.ReactNode }> = ({
         const newMnemonic = bip39.generateMnemonic();
         setMnemonic(newMnemonic);
         setWallets(deriveWallets(newMnemonic));
-        await setLocalStorage("wallet_mnemonic", newMnemonic, true);
+        await setLocalStorage(`wallet_mnemonic_${appNetwork}`, newMnemonic, true);
       }
       setLoading(false);
     })();
