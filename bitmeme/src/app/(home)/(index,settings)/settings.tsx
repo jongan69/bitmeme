@@ -59,7 +59,7 @@ export default function Page() {
   const appNetwork = usePersistentStore((state) => state.appNetwork);
   const { data: balance, mutate, isValidating: isStacksValidating } = useStacksBalance(stacksAddress || "", appNetwork);
 
-  console.log("balance", balance);
+  // console.log("balance", balance);
   // Memoize gravatar URI
   // const gravatarUri = useMemo(
   //   () => `https://www.gravatar.com/avatar/${bitcoinAddress || ''}?s=250`,

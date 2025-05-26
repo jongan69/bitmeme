@@ -27,6 +27,9 @@ export function useWalletOnboarding(onReady?: () => void) {
     // Log when stacksAddress is set
     useEffect(() => {
         if (stacks?.address) console.log("Stacks wallet loaded: ", stacks.address);
+        if (bitcoin?.address) console.log("Bitcoin wallet loaded: ", bitcoin.address);
+        if (solana?.publicKey) console.log("Solana wallet loaded: ", solana.publicKey);
+        if (stacks?.address && bitcoin?.address && solana?.publicKey) console.log("All wallets loaded");
     }, [stacks?.address]);
 
     return {

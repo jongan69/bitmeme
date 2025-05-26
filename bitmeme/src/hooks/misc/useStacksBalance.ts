@@ -36,7 +36,7 @@ const useStacksBalance = (address: string | null, appNetwork: AppNetwork) => {
       dedupingInterval: 30000,
     }
   );
-  console.log("SWR error", error);
+  // console.log("SWR error", error);
   return {
     data: data ?? new BigNumber(0),
     isLoading,

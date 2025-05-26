@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import * as bip39 from "bip39";
 import * as ecc from '@bitcoinerlab/secp256k1';
 import { BIP32Factory } from 'bip32';
@@ -14,6 +14,7 @@ import { notifyError } from "@/utils/notification";
 import { useNetworkConfig } from "@/hooks/misc/useNetworkConfig";
 import { AppNetwork, BitcoinNetwork, HyperevmNetwork, StacksNetwork } from "@/types/store";
 import { Platform } from "react-native";
+import { getLocalStorage, setLocalStorage } from "@/utils/localStorage";
 
 // If you see module not found errors for bip39, bip32, ethers, ecpair, install them with:
 // npm install bip39 bip32 bitcoinjs-lib @stacks/transactions @stacks/network @solana/web3.js ethers ecpair @bitcoinerlab/secp256k1
@@ -146,15 +147,16 @@ function selectUtxosForAmount(
 export const UnifiedWalletProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const networkConfig = useNetworkConfig();
   const stacksNetworkType = networkConfig.stacksNetwork;
-  console.log("stacksNetworkType", stacksNetworkType);
+  // console.log("stacksNetworkType", stacksNetworkType);
   const stacksNetwork = stacksNetworkType === StacksNetwork.Mainnet ? STACKS_MAINNET : STACKS_TESTNET;
-  console.log("stacksNetwork", stacksNetwork);
+  // console.log("stacksNetwork", stacksNetwork);
   const bitcoinNetworkType = networkConfig.bitcoinNetwork;
   const bitcoinNetwork = bitcoinNetworkType === BitcoinNetwork.Mainnet ? bitcoin.networks.bitcoin : bitcoin.networks.testnet;
 
-  const [mnemonic, setMnemonic] = useState(() => bip39.generateMnemonic());
+  const [mnemonic, setMnemonic] = useState<string | null>(null);
+  const [wallets, setWallets] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Derive all wallets from mnemonic
   const deriveWallets = useCallback((mnemonic: string) => {
     const seed = bip39.mnemonicToSeedSync(mnemonic);
     const root = bip32.fromSeed(seed);
@@ -218,7 +220,23 @@ export const UnifiedWalletProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, []);
 
-  const [wallets, setWallets] = useState(() => deriveWallets(mnemonic));
+  useEffect(() => {
+    (async () => {
+      const savedMnemonic = await getLocalStorage<string>("wallet_mnemonic", true); // use secure storage
+      if (savedMnemonic) {
+        console.log("Mnemonic found, loading wallets");
+        setMnemonic(savedMnemonic);
+        setWallets(deriveWallets(savedMnemonic));
+      } else {
+        console.log("No mnemonic found, generating new one");
+        const newMnemonic = bip39.generateMnemonic();
+        setMnemonic(newMnemonic);
+        setWallets(deriveWallets(newMnemonic));
+        await setLocalStorage("wallet_mnemonic", newMnemonic, true);
+      }
+      setLoading(false);
+    })();
+  }, [deriveWallets]);
 
   // --- Solana functions ---
   const solanaSignTransaction = async (tx: SolanaTx | VersionedTransaction) => {
@@ -345,14 +363,15 @@ export const UnifiedWalletProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   // Regenerate mnemonic and wallets
-  const regenerate = useCallback(() => {
+  const regenerate = useCallback(async () => {
     const newMnemonic = bip39.generateMnemonic();
     setMnemonic(newMnemonic);
     setWallets(deriveWallets(newMnemonic));
+    await setLocalStorage("wallet_mnemonic", newMnemonic, true);
   }, [deriveWallets]);
 
   // Export mnemonic
-  const exportMnemonic = useCallback(() => mnemonic, [mnemonic]);
+  const exportMnemonic = useCallback(() => mnemonic || "", [mnemonic]);
 
   // --- Stacks tipUser function ---
   // Simple log setter fallback
@@ -392,6 +411,10 @@ export const UnifiedWalletProvider: React.FC<{ children: React.ReactNode }> = ({
       notifyError && notifyError(`Tip Stacks error: ${err.message || err}`);
     }
   };
+
+  if (loading || !mnemonic || !wallets) {
+    return null; // or a loading spinner
+  }
 
   return (
     <UnifiedWalletContext.Provider
