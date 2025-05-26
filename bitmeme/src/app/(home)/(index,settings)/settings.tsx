@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useMemo, memo } from "react";
-import { Button, Switch, Text, View, KeyboardAvoidingView, Platform } from "react-native";
+import React, { useState, useCallback, useMemo } from "react";
+import { Button, Text, View, KeyboardAvoidingView, Platform } from "react-native";
 import { Image } from "expo-image";
 import { useNetworkState } from 'expo-network';
 import { router } from "expo-router";
@@ -15,7 +15,6 @@ import Animated, {
 // Components
 import { ContentUnavailable } from "@/components/ui/ContentUnavailable";
 import * as Form from "@/components/ui/Form";
-import { IconSymbol } from "@/components/ui/IconSymbol";
 import {
   Segments,
   SegmentsContent,
@@ -25,7 +24,6 @@ import {
 import Stack from "@/components/ui/Stack";
 import { GlurryList } from "@/components/ui/glurry-modal";
 import TextInput from "@/components/ui/TextInput";
-import TouchableBounce from "@/components/ui/TouchableBounce";
 
 // Hooks
 import { useWalletOnboarding } from "@/hooks/useWallets";
@@ -38,10 +36,9 @@ import { useBtcBalanceSats } from "@/hooks/misc/useBtcBalanceSats";
 import { useUnifiedWallet } from "@/contexts/UnifiedWalletProvider";
 
 // Graphics
-import Icon from "@/components/ui/Icons";
 import TwitterSvg from "@/svg/twitter.svg";
-import BitmemeLogo from "@/images/logo.png";
 import headerLogo from "@/images/headerlogo.png";
+
 // Utils
 import { notifyError, notifySuccess } from "@/utils/notification";
 import { PublicKey } from "@solana/web3.js";
@@ -49,107 +46,13 @@ import usePersistentStore from "@/stores/local/persistentStore";
 
 // Types
 import { SolanaNetwork, BitcoinNetwork } from "@/types/store";
+import { RpcStatusSection } from "@/components/ui/RpcStatusSection";
+import { BalancesSection } from "@/components/ui/BalanceSection";
+import { AutoTipSwitch } from "@/components/ui/AutoTipSwitch";
+import { TripleItem } from "@/components/ui/TripleItem";
+import { FormExpandable } from "@/components/ui/FormExpandable";
 
 const isDev = process.env.EXPO_PUBLIC_APP_NETWORK === "devnet";
-
-function Switches({ autoTipOn, setAutoTipOn }: { autoTipOn: boolean; setAutoTipOn: (value: boolean) => void }) {
-  return (
-    <Form.Section title="Settings">
-      <Form.Text
-        systemImage={"banknote.fill"}
-        hint={<Switch value={autoTipOn} onValueChange={setAutoTipOn} />}
-      >
-        Auto-Tip on like
-      </Form.Text>
-    </Form.Section>
-  );
-}
-
-const BalancesSection = memo(function BalancesSection({
-  onRefresh,
-  isRefreshing,
-  balance,
-  nativeBalance,
-  spendableUTXOs,
-  image,
-}: {
-  stacksAddress: string;
-  solanaAddress: string;
-  onRefresh: () => void;
-  isRefreshing: boolean;
-  balance: any;
-  nativeBalance: any;
-  spendableUTXOs: any;
-  image: string;
-}) {
-  return (
-    <Form.Section>
-      <View style={{ alignItems: "center", gap: 8, padding: 16, flex: 1, width: '100%' }}>
-        <Image
-          source={image}
-          style={{
-            aspectRatio: 1,
-            height: 64,
-            borderRadius: 8,
-          }}
-        />
-        <Form.Text style={{ fontSize: 20, fontWeight: "600" }}>
-          Welcome to BitMeme!
-        </Form.Text>
-        <Form.HStack style={{ justifyContent: 'center', alignItems: 'center', width: '100%' }}>
-          <View style={{ flex: 1 }}>
-            <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
-              STX balance: {balance?.toString()} STX
-            </Form.Text>
-            <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
-              SOL balance: {nativeBalance.lamports} Lamports
-            </Form.Text>
-            <Form.Text style={{ textAlign: "center", fontSize: 14 }}>
-              BTC balance: {spendableUTXOs} sats
-            </Form.Text>
-          </View>
-          <TouchableBounce
-            onPress={onRefresh}
-            sensory
-            style={{ marginLeft: 8, padding: 8 }}
-            disabled={isRefreshing}
-          >
-            {isRefreshing ? (
-              <Icon name="ButtonLoader" size={24} />
-            ) : (
-              <Icon name="Swap" size={24} />
-            )}
-          </TouchableBounce>
-        </Form.HStack>
-      </View>
-    </Form.Section>
-  );
-});
-
-const RpcStatusSection = memo(function RpcStatusSection({
-  rpcConnected,
-  rpcChecking,
-  onRefresh,
-}: {
-  rpcConnected: boolean | null;
-  rpcChecking: boolean;
-  onRefresh: () => void;
-}) {
-  return (
-    <ContentUnavailable
-      title="RPC Connection"
-      systemImage="network"
-      actions={<Button title="Refresh" onPress={onRefresh} disabled={rpcChecking} />}
-      description={
-        rpcConnected === null
-          ? "Checking RPC connection..."
-          : rpcConnected
-            ? "Connected to Helius RPC"
-            : "Not connected to Helius RPC"
-      }
-    />
-  );
-});
 
 export default function Page() {
   const { solanaAddress, bitcoinAddress, stacksAddress } = useWalletOnboarding();
@@ -364,7 +267,6 @@ export default function Page() {
               balance={balance}
               nativeBalance={nativeBalance}
               spendableUTXOs={btcBalance}
-              image={BitmemeLogo}
             />
           )}
           {isDev && <Form.Section>
@@ -398,11 +300,11 @@ export default function Page() {
 
           <Form.Section>
             <Form.HStack style={{ alignItems: "stretch", gap: 12 }}>
-              <TripleItemTest />
+              <TripleItem />
             </Form.HStack>
           </Form.Section>
 
-          <Switches autoTipOn={autoTipOn} setAutoTipOn={setAutoTipOn} />
+          <AutoTipSwitch autoTipOn={autoTipOn} setAutoTipOn={setAutoTipOn} />
           {autoTipOn && hasHydrated && (
             <Segments value={tipCurrency} onValueChange={setTipCurrency}>
               <SegmentsList>
@@ -478,14 +380,13 @@ export default function Page() {
               systemImage="banknote"
               description={bitcoinAddress ? "Ready to receive tips!" : "No Bitcoin wallet found"}
             />
+            
           </Form.Section>
 
 
           <Form.Section title="App Info">
             <Form.Text hint="BitMeme v1.0">Version</Form.Text>
-            <Form.Text hint={`${process.env.EXPO_PUBLIC_BITCOIN_NETWORK}`}>Bitcoin Network</Form.Text>
-            <Form.Text hint={`${process.env.EXPO_PUBLIC_SOLANA_NETWORK}`}>Solana Network</Form.Text>
-            <Form.Text hint={`${process.env.EXPO_PUBLIC_STACKS_NETWORK}`}>Stacks Network</Form.Text>
+            <Form.Text hint={`${process.env.EXPO_PUBLIC_APP_NETWORK}`}>App Network</Form.Text>
             <Form.Text hint="0">Sats Tipped</Form.Text>
 
             <FormExpandable
@@ -523,146 +424,5 @@ export default function Page() {
         </Form.List>
       </View>
     </KeyboardAvoidingView>
-  );
-}
-
-function FormExpandable({
-  children,
-  hint,
-  preview,
-}: {
-  custom: true;
-  children?: React.ReactNode;
-  hint?: string;
-  preview?: string;
-}) {
-  const [open, setOpen] = React.useState(false);
-
-  // TODO: If the entire preview can fit, then just skip the hint.
-
-  return (
-    <Form.FormItem onPress={() => setOpen(!open)}>
-      <Form.HStack style={{ flexWrap: "wrap" }}>
-        <Form.Text>{children}</Form.Text>
-        {/* Spacer */}
-        <View style={{ flex: 1 }} />
-        {open && (
-          <IconSymbol
-            name={open ? "chevron.up" : "chevron.down"}
-            size={16}
-            color={AC.systemGray}
-          />
-        )}
-        {/* Right */}
-        <Form.Text style={{ flexShrink: 1, color: AC.secondaryLabel }}>
-          {open ? hint : preview}
-        </Form.Text>
-        {!open && (
-          <IconSymbol
-            name={open ? "chevron.up" : "chevron.down"}
-            size={16}
-            color={AC.systemGray}
-          />
-        )}
-      </Form.HStack>
-    </Form.FormItem>
-  );
-}
-
-
-
-function TripleItemTest() {
-  return (
-    <>
-      <HorizontalItem title="Launched" badge="May" subtitle="2025" />
-
-      <View
-        style={{
-          backgroundColor: AC.separator,
-          width: 0.5,
-          maxHeight: "50%",
-          minHeight: "50%",
-          marginVertical: "auto",
-        }}
-      />
-
-      <HorizontalItem
-        title="Developer"
-        badge={
-          <IconSymbol
-            name="person.text.rectangle"
-            size={28}
-            weight="bold"
-            animationSpec={{
-              effect: {
-                type: "pulse",
-              },
-              repeating: true,
-            }}
-            color={AC.secondaryLabel}
-          />
-        }
-        subtitle="BitMeme Dev"
-      />
-
-      <View
-        style={{
-          backgroundColor: AC.separator,
-          width: 0.5,
-          maxHeight: "50%",
-          minHeight: "50%",
-          marginVertical: "auto",
-        }}
-      />
-
-      <HorizontalItem title="Version" badge="v1.0" subtitle="Initial Release" />
-    </>
-  );
-}
-
-function HorizontalItem({
-  title,
-  badge,
-  subtitle,
-}: {
-  title: string;
-  badge: React.ReactNode;
-  subtitle: string;
-}) {
-  return (
-    <View style={{ alignItems: "center", gap: 4, flex: 1 }}>
-      <Form.Text
-        style={{
-          textTransform: "uppercase",
-          fontSize: 10,
-          fontWeight: "600",
-          color: AC.secondaryLabel,
-        }}
-      >
-        {title}
-      </Form.Text>
-      {typeof badge === "string" ? (
-        <Form.Text
-          style={{
-            fontSize: 20,
-            fontWeight: "bold",
-            color: AC.secondaryLabel,
-          }}
-        >
-          {badge}
-        </Form.Text>
-      ) : (
-        badge
-      )}
-
-      <Form.Text
-        style={{
-          fontSize: 12,
-          color: AC.secondaryLabel,
-        }}
-      >
-        {subtitle}
-      </Form.Text>
-    </View>
   );
 }

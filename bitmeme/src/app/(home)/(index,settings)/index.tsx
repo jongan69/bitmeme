@@ -14,12 +14,9 @@ import { useTipSettingsStore } from "@/stores/tipSettingsStore";
 import { useUnifiedWallet } from "@/contexts/UnifiedWalletProvider";
 
 // Utils
-import { notifyError, notifyInfo, notifyTx } from "@/utils/notification";
-import { PublicKey } from "@solana/web3.js";
-import { InteractionType } from "@/types/api";
-import { Chain } from "@/types/network";
-import { BitcoinNetwork, SolanaNetwork, StacksNetwork } from "@/types/store";
-import { mintNFT } from "@/utils/stacksMintNft";
+import { handleShareMeme } from "@/utils/share";
+import { handleDownloadMeme } from "@/utils/download";
+import { handleLikeAndTip } from "@/utils/likeAndTip";
 
 function MemesRefreshRegister() {
   Form.useListRefresh(async () => {
@@ -37,6 +34,7 @@ export default function Page() {
       { translateY: interpolate(scroll.value, [-120, -70], [50, 0], "clamp") },
     ],
   }));
+  const network = process.env.EXPO_PUBLIC_APP_NETWORK!
   const { solanaAddress, bitcoinAddress, stacksAddress } = useWalletOnboarding();
 
   const { tipCurrency, tipAmount, autoTipOn } = useTipSettingsStore();
@@ -67,59 +65,6 @@ export default function Page() {
   const [userId] = useUserIdAndNickname();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-
-  // --- Tip logic ---
-  const handleLikeAndTip = async (meme: any, hasLiked: boolean) => {
-    if (hasLiked) {
-      removeLike(meme.id);
-      return;
-    }
-    addLike(meme.id);
-    if (!autoTipOn) return;
-    if (!solanaAddress && !bitcoinAddress && !stacksAddress) {
-      notifyError("No wallet address found");
-      return;
-    }
-    try {
-      if (tipCurrency === "STX" && meme.stacksAddress) {
-        const txid = await stacksTipUser(meme.stacksAddress, BigInt(tipAmount));
-        if (txid) {
-          notifyTx(true, { chain: Chain.Stacks, type: InteractionType.Tip, txId: txid, network: StacksNetwork.Testnet });
-        }
-      } else if (tipCurrency === "SOL" && meme.solanaAddress) {
-        const txid = await transfer(Number(tipAmount), "SOL", new PublicKey(meme.solanaAddress), true);
-        if (txid) {
-          notifyTx(true, { chain: Chain.Solana, type: InteractionType.Tip, txId: txid, network: SolanaNetwork.Devnet });
-        }
-      } else if (tipCurrency === "BTC" && meme.bitcoinAddress) {
-        const DUST_THRESHOLD = 330;
-        const tipNum = Number(tipAmount);
-        if (isNaN(tipNum) || tipNum < DUST_THRESHOLD) {
-          console.log(tipNum)
-          notifyError(`Tip amount must be a number and at least ${DUST_THRESHOLD} sats (dust threshold)`);
-          return;
-        }
-        const txid = await sendBitcoin(meme.bitcoinAddress, tipNum);
-        if (txid) {
-          notifyTx(true, { chain: Chain.Bitcoin, type: InteractionType.Tip, txId: txid, network: BitcoinNetwork.Testnet });
-        }
-      } else {
-        notifyInfo("No address for selected tip currency.");
-        console.log("No address for selected tip currency: ", tipCurrency, meme.stacksAddress, meme.solanaAddress, meme.bitcoinAddress);
-      }
-    } catch (e: any) {
-      console.log("Tip failed: ", e);
-      notifyError("Tip failed: " + (e && (e.message || typeof e === 'string' ? e : JSON.stringify(e))));
-    }
-  };
-
-  // Placeholder for Stacks tip logic
-  const stacksTipUser = async (recipient: string, amount: bigint) => {
-    // TODO: Replace with actual Stacks transfer logic
-    // Example: Use mintNFT or a transfer utility
-    // return await mintNFT(stacks.privateKey, recipient, amount);
-    return null;
-  };
 
   return (
     <Form.List
@@ -203,7 +148,7 @@ export default function Page() {
                 </Text>
                 <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
                   <TouchableOpacity
-                    onPress={() => handleLikeAndTip(meme, hasLiked)}
+                    onPress={() => handleLikeAndTip(meme, hasLiked, removeLike, addLike, autoTipOn, solanaAddress, bitcoinAddress, stacksAddress, tipCurrency, tipAmount, sendBitcoin, stacks, transfer, network)}
                     style={{
                       flexDirection: "row",
                       alignItems: "center",
@@ -238,6 +183,40 @@ export default function Page() {
                     <Text style={{ color: "#2980b9" }}>
                       {memeComments.length}
                     </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleDownloadMeme(meme)}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      paddingVertical: 4,
+                      paddingHorizontal: 8,
+                      borderRadius: 8,
+                      backgroundColor: "#eaf7ff",
+                      marginLeft: 8,
+                    }}
+                  >
+                    <Text style={{ color: "#2980b9", fontWeight: "bold", marginRight: 4 }}>
+                      ⬇️
+                    </Text>
+                    <Text style={{ color: "#2980b9" }}>Download</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleShareMeme(meme)}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      paddingVertical: 4,
+                      paddingHorizontal: 8,
+                      borderRadius: 8,
+                      backgroundColor: "#eaf7ff",
+                      marginLeft: 8,
+                    }}
+                  >
+                    <Text style={{ color: "#2980b9", fontWeight: "bold", marginRight: 4 }}>
+                      📤
+                    </Text>
+                    <Text style={{ color: "#2980b9" }}>Share</Text>
                   </TouchableOpacity>
                 </View>
                 {expandedMemeId === meme.id && (
