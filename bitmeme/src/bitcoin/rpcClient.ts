@@ -9,8 +9,8 @@ export const broadcastRawTx = async (
   network: 'mainnet' | 'testnet' = 'testnet'
 ): Promise<string> => {
   const url = network === 'mainnet'
-    ? 'https://blockstream.info/api/tx'
-    : 'https://warmhearted-morning-cherry.btc-testnet.quiknode.pro/';
+    ? process.env.EXPO_PUBLIC_BITCOIN_MAINNET_RPC!
+    : process.env.EXPO_PUBLIC_BITCOIN_TESTNET_RPC!;
   try {
     console.log('[broadcastRawTxViaBlockstream] Broadcasting payload:', rawTx);
     console.log('using url: ', url)
@@ -49,8 +49,8 @@ export const testMempoolAccept = async (
   network: 'mainnet' | 'testnet' = 'testnet'
 ): Promise<any> => {
   const url = network === 'mainnet'
-    ? 'https://blockstream.info/api/tx' // Replace with your mainnet RPC endpoint if needed
-    : 'https://warmhearted-morning-cherry.btc-testnet.quiknode.pro/';
+    ? process.env.EXPO_PUBLIC_BITCOIN_MAINNET_RPC!
+    : process.env.EXPO_PUBLIC_BITCOIN_TESTNET_RPC!;
   try {
     const body = JSON.stringify({
       id: 1,
@@ -82,8 +82,8 @@ export const decodeRawTransaction = async (
   network: 'mainnet' | 'testnet' = 'testnet'
 ): Promise<any> => {
   const url = network === 'mainnet'
-    ? 'https://blockstream.info/api/tx' // Replace with your mainnet RPC endpoint if needed
-    : 'https://warmhearted-morning-cherry.btc-testnet.quiknode.pro/';
+    ? process.env.EXPO_PUBLIC_BITCOIN_MAINNET_RPC!
+    : process.env.EXPO_PUBLIC_BITCOIN_TESTNET_RPC!;
   try {
     const body = JSON.stringify({
       id: 1,

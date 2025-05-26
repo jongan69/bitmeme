@@ -28,7 +28,6 @@ import TextInput from "@/components/ui/TextInput";
 import TouchableBounce from "@/components/ui/TouchableBounce";
 
 // Hooks
-import { useSolanaWallet } from "@/contexts/SolanaWalletProvider";
 import { useWalletOnboarding } from "@/hooks/useWallets";
 import { useClerk } from "@clerk/clerk-expo";
 import useStacksBalance from "@/hooks/misc/useStacksBalance";
@@ -36,6 +35,7 @@ import { useTipSettingsStore } from "@/stores/tipSettingsStore";
 import { useHoldings } from "@/hooks/misc/useHoldings";
 import { useMultiAirdrop } from "@/hooks/useMultiAirdrop";
 import { useBtcBalanceSats } from "@/hooks/misc/useBtcBalanceSats";
+import { useUnifiedWallet } from "@/contexts/UnifiedWalletProvider";
 
 // Graphics
 import Icon from "@/components/ui/Icons";
@@ -45,11 +45,12 @@ import headerLogo from "@/images/headerlogo.png";
 // Utils
 import { notifyError, notifySuccess } from "@/utils/notification";
 import { PublicKey } from "@solana/web3.js";
+import usePersistentStore from "@/stores/local/persistentStore";
 
 // Types
 import { SolanaNetwork, BitcoinNetwork } from "@/types/store";
 
-const isDev = process.env.EXPO_PUBLIC_SOLANA_NETWORK === "devnet";
+const isDev = process.env.EXPO_PUBLIC_APP_NETWORK === "devnet";
 
 function Switches({ autoTipOn, setAutoTipOn }: { autoTipOn: boolean; setAutoTipOn: (value: boolean) => void }) {
   return (
@@ -151,10 +152,11 @@ const RpcStatusSection = memo(function RpcStatusSection({
 });
 
 export default function Page() {
-  const { connection } = useSolanaWallet();
   const { solanaAddress, bitcoinAddress, stacksAddress } = useWalletOnboarding();
-  const { data: balance, mutate, isValidating: isStacksValidating } = useStacksBalance(stacksAddress || "");
+  const appNetwork = usePersistentStore((state) => state.appNetwork);
+  const { data: balance, mutate, isValidating: isStacksValidating } = useStacksBalance(stacksAddress || "", appNetwork);
 
+  console.log("balance", balance);
   // Memoize gravatar URI
   // const gravatarUri = useMemo(
   //   () => `https://www.gravatar.com/avatar/${bitcoinAddress || ''}?s=250`,
@@ -193,6 +195,9 @@ export default function Page() {
 
   // MultiAirdrop hook
   const { requestAirdrops, results: airdropResults, loading: airdropLoading } = useMultiAirdrop();
+
+  const { solana } = useUnifiedWallet();
+  const connection = solana.connection;
 
   // Add this function:
   const refreshBalances = useCallback(() => {
@@ -283,12 +288,7 @@ export default function Page() {
     >
       <View style={{ flex: 1 }}>
         {show &&
-          <GlurryList
-            setShow={setShow}
-            solanaWalletAddress={solanaAddress ? solanaAddress.toString() : ''}
-            bitcoinAddress={bitcoinAddress || ''}
-            stacksAddress={stacksAddress || ''}
-          />
+          <GlurryList setShow={setShow} />
         }
         <Stack.Screen
           options={{

@@ -17,15 +17,13 @@ import { tokenCache } from "@/stores/local/cache";
 import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";
 
 // Contexts
-import { BitcoinWalletProvider } from '@/contexts/BitcoinWalletProvider';
-import { SolanaWalletProvider } from '@/contexts/SolanaWalletProvider';
+import { UnifiedWalletProvider } from "@/contexts/UnifiedWalletProvider";
 import { ZplClientProvider } from '@/contexts/ZplClientProvider';
-import { StacksProvider } from "@/contexts/StacksWalletProvider";
 import ThemeProvider from "@/components/ui/ThemeProvider";
 
 import { SourceCodePro_400Regular } from "@expo-google-fonts/source-code-pro";
 import { InteractionType } from "@/types/api";
-import { getExplorerUrl } from "@/utils/explorerUrl";
+// import { getExplorerUrl } from "@/utils/explorerUrl";
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
 SplashScreen.preventAutoHideAsync();
@@ -86,10 +84,10 @@ export default function Layout() {
                 : CustomDefaultTheme}
             >
               <GestureHandlerRootView>
-                <SolanaWalletProvider>
+                <UnifiedWalletProvider>
+                
                   <ZplClientProvider>
-                    <BitcoinWalletProvider>
-                      <StacksProvider>
+                  
                         <Slot />
                         <StatusBar animated />
                         <SystemBars style={"auto"} />
@@ -168,10 +166,10 @@ export default function Layout() {
                             ),
                           }}
                         />
-                      </StacksProvider>
-                    </BitcoinWalletProvider>
+                    
                   </ZplClientProvider>
-                </SolanaWalletProvider>
+               
+                </UnifiedWalletProvider>
               </GestureHandlerRootView>
             </RNThemeProvider>
           </ClerkLoaded>

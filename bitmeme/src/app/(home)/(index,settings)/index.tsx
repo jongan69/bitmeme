@@ -8,11 +8,10 @@ import Animated, { interpolate, useAnimatedRef, useAnimatedStyle, useScrollViewO
 // Hooks
 import { useWalletOnboarding } from "@/hooks/useWallets";
 import { useSolanaPayment } from "@/hooks/misc/usePayment";
-import { useBitcoinWallet } from "@/contexts/BitcoinWalletProvider";
 import { useTable, useAddLikeCallback, useRemoveLikeCallback, useAddCommentCallback, forceSyncMemes } from "@/stores/Memestore";
 import { useUserIdAndNickname } from "@/hooks/useNickname";
-import { useStacks } from "@/contexts/StacksWalletProvider";
 import { useTipSettingsStore } from "@/stores/tipSettingsStore";
+import { useUnifiedWallet } from "@/contexts/UnifiedWalletProvider";
 
 // Utils
 import { notifyError, notifyInfo, notifyTx } from "@/utils/notification";
@@ -20,6 +19,7 @@ import { PublicKey } from "@solana/web3.js";
 import { InteractionType } from "@/types/api";
 import { Chain } from "@/types/network";
 import { BitcoinNetwork, SolanaNetwork, StacksNetwork } from "@/types/store";
+import { mintNFT } from "@/utils/stacksMintNft";
 
 function MemesRefreshRegister() {
   Form.useListRefresh(async () => {
@@ -41,8 +41,9 @@ export default function Page() {
 
   const { tipCurrency, tipAmount, autoTipOn } = useTipSettingsStore();
   const { transfer } = useSolanaPayment();
-  const { sendBitcoin } = useBitcoinWallet();
-  const { tipUser } = useStacks();
+  const { bitcoin, stacks } = useUnifiedWallet();
+  const sendBitcoin = bitcoin.sendBitcoin;
+  // const tipUser = stacks.tipUser; // If you have a tipUser util, otherwise adjust as needed
 
   // Use table-level hooks
   const memes = useTable("memes", "memeStore");
@@ -81,7 +82,7 @@ export default function Page() {
     }
     try {
       if (tipCurrency === "STX" && meme.stacksAddress) {
-        const txid = await tipUser(meme.stacksAddress, BigInt(tipAmount));
+        const txid = await stacksTipUser(meme.stacksAddress, BigInt(tipAmount));
         if (txid) {
           notifyTx(true, { chain: Chain.Stacks, type: InteractionType.Tip, txId: txid, network: StacksNetwork.Testnet });
         }
@@ -110,6 +111,14 @@ export default function Page() {
       console.log("Tip failed: ", e);
       notifyError("Tip failed: " + (e && (e.message || typeof e === 'string' ? e : JSON.stringify(e))));
     }
+  };
+
+  // Placeholder for Stacks tip logic
+  const stacksTipUser = async (recipient: string, amount: bigint) => {
+    // TODO: Replace with actual Stacks transfer logic
+    // Example: Use mintNFT or a transfer utility
+    // return await mintNFT(stacks.privateKey, recipient, amount);
+    return null;
   };
 
   return (

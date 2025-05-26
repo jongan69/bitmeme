@@ -6,7 +6,9 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "typeRoots": ["./global.d.ts"]
+    "typeRoots": ["./global.d.ts"],
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": true
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
 }

@@ -2,28 +2,23 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 import {
-  BitcoinNetwork,
+  AppNetwork,
   PersistentActions,
-  PersistentState,
-  SolanaNetwork,
+  PersistentState
 } from "@/types/store";
 
-const bitcoinNetwork = process.env.EXPO_PUBLIC_BITCOIN_NETWORK === "testnet" ? BitcoinNetwork.Testnet : BitcoinNetwork.Mainnet;
-const solanaNetwork = process.env.EXPO_PUBLIC_SOLANA_NETWORK === "devnet" ? SolanaNetwork.Devnet : SolanaNetwork.Mainnet;
+const appNetwork = process.env.EXPO_PUBLIC_APP_NETWORK === "devnet" ? AppNetwork.Devnet : AppNetwork.Mainnet;
 
 
 const usePersistentStore = create<PersistentState & PersistentActions>()(
   persist(
     (set) => ({
       // States
-      solanaNetwork: solanaNetwork,
-      bitcoinNetwork: bitcoinNetwork,
+      appNetwork: appNetwork,
 
       // Actions
-      setSolanaNetwork: (network: SolanaNetwork) =>
-        set({ solanaNetwork: network }),
-      setBitcoinNetwork: (network: BitcoinNetwork) =>
-        set({ bitcoinNetwork: network }),
+      setAppNetwork: (network: AppNetwork) =>
+        set({ appNetwork: network }),
     }),
     {
       name: "bitmeme",

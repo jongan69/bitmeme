@@ -4,12 +4,11 @@ import usePersistentStore from "@/stores/local/persistentStore";
 import { getNetworkConfig } from "@/utils/network";
 
 export const useNetworkConfig = () => {
-  const solanaNetwork = usePersistentStore((state) => state.solanaNetwork);
-  const bitcoinNetwork = usePersistentStore((state) => state.bitcoinNetwork);
+  const appNetwork = usePersistentStore((state) => state.appNetwork);
 
   const config = useMemo(
-    () => getNetworkConfig(solanaNetwork, bitcoinNetwork),
-    [solanaNetwork, bitcoinNetwork]
+    () => getNetworkConfig(appNetwork),
+    [appNetwork]
   );
   return config;
 };

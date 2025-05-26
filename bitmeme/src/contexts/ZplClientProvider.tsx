@@ -1,9 +1,10 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { useSolanaWallet } from "./SolanaWalletProvider";
 
 import { useNetworkConfig } from "@/hooks/useNetworkConfig";
 import { fetchAndCacheZplProgramIdsAndAssetMint } from "@/utils/networkConfigLoader";
 import { ZplClient } from "./zplClient";
+import { PublicKey, Transaction, VersionedTransaction } from "@solana/web3.js";
+import { useUnifiedWallet } from "./UnifiedWalletProvider";
 
 const ZplClientContext = createContext<ZplClient | null>(null);
 
@@ -32,7 +33,10 @@ export const ZplClientProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const networkConfig = useNetworkConfig();
 
-  const { publicKey: walletPublicKey, signTransaction, connection } = useSolanaWallet();
+  const { solana } = useUnifiedWallet();
+  const connection = solana.connection;
+  const publicKey = new PublicKey(solana.publicKey);
+  const signTransaction = solana.signTransaction;
 
   // Add state for the fetched values
   const [programIds, setProgramIds] = useState<{ twoWayPegProgramId?: string; liquidityManagementProgramId?: string; assetMint?: string }>({});
@@ -54,11 +58,13 @@ export const ZplClientProvider: React.FC<{ children: React.ReactNode }> = ({
         console.error("Failed to fetch program IDs or asset mint", err);
       });
     return () => { isMounted = false; };
-  }, [networkConfig.bootstrapperProgramId, networkConfig.guardianSetting, connection.rpcEndpoint, walletPublicKey]);
+  }, [networkConfig.bootstrapperProgramId, networkConfig.guardianSetting, connection.rpcEndpoint, publicKey]);
+
+  const genericSignTransaction = <T extends Transaction | VersionedTransaction>(tx: T) => solana.signTransaction(tx) as Promise<T>;
 
   const client = useMemo(() => {
     if (
-      !walletPublicKey ||
+      !publicKey ||
       !programIds.twoWayPegProgramId ||
       !programIds.liquidityManagementProgramId ||
       !programIds.assetMint
@@ -67,19 +73,19 @@ export const ZplClientProvider: React.FC<{ children: React.ReactNode }> = ({
     }
     return new ZplClient(
       connection,
-      walletPublicKey,
-      signTransaction,
+      publicKey,
+      genericSignTransaction,
       programIds.twoWayPegProgramId,
       programIds.liquidityManagementProgramId,
       programIds.assetMint
     );
   }, [
     connection,
-    walletPublicKey,
+    publicKey,
     programIds.twoWayPegProgramId,
     programIds.liquidityManagementProgramId,
     programIds.assetMint,
-    signTransaction,
+    genericSignTransaction,
   ]);
 
   return (

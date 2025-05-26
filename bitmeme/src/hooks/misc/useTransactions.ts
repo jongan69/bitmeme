@@ -1,8 +1,8 @@
-import { useSolanaWallet } from "@/contexts/SolanaWalletProvider";
 import { TransactionList } from "@/types/transaction";
 import { PublicKey } from "@solana/web3.js";
 import { useCallback, useEffect, useState } from "react";
 import { getLocalStorage, setLocalStorage } from '../../utils/localStorage'
+import { useUnifiedWallet } from "@/contexts/UnifiedWalletProvider";
 const CACHE_PREFIX = "transactions_cache_";
 
 async function getCachedTransactions(address: string) {
@@ -28,7 +28,8 @@ async function getTransactions(address: PublicKey, network: string) {
 
 export function useTransactions(address: PublicKey) {
     const [transactions, setTransactions] = useState<TransactionList>([]);
-    const { network } = useSolanaWallet();
+    const { solana } = useUnifiedWallet();
+    const network = solana.network;
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 

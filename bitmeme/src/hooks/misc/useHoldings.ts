@@ -1,4 +1,5 @@
-import { useSolanaWallet } from "@/contexts/SolanaWalletProvider";
+import { useUnifiedWallet } from "@/contexts/UnifiedWalletProvider";
+
 import { HoldingList, NativeBalance } from "@/types/holdings";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getLocalStorage, setLocalStorage } from "@/utils/localStorage";
@@ -32,13 +33,16 @@ async function getHoldings(address: PublicKey, network: string) {
 }
 
 export function useHoldings(address: PublicKey) {
+    const { solana } = useUnifiedWallet();
+    const connection = solana.connection;
+    const network = solana.network;
     const [holdings, setHoldings] = useState<HoldingList>([]);
     const [nativeBalance, setNativeBalance] = useState<NativeBalance>({
         lamports: 0,
         price_per_sol: 0,
         total_price: 0
     });
-    const { network } = useSolanaWallet();
+    
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 

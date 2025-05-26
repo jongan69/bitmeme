@@ -1,3 +1,8 @@
+export enum AppNetwork {
+  Devnet = "devnet",
+  Mainnet = "mainnet",
+}
+
 export enum SolanaNetwork {
   Devnet = "devnet",
   Mainnet = "mainnet",
@@ -14,12 +19,27 @@ export enum StacksNetwork {
   Mainnet = "mainnet",
 }
 
+export enum EthereumNetwork {
+  Devnet = "devnet",
+  Mainnet = "mainnet",
+}
+
+export enum HyperevmNetwork {
+  Devnet = "devnet",
+  Mainnet = "mainnet",
+} 
+
+export enum BinanceNetwork {
+  Devnet = "devnet",
+  Mainnet = "mainnet",
+}
+
+
+
 export type PersistentState = {
-  solanaNetwork: SolanaNetwork;
-  bitcoinNetwork: BitcoinNetwork;
+  appNetwork: AppNetwork;
 };
 
 export type PersistentActions = {
-  setSolanaNetwork: (network: SolanaNetwork) => void;
-  setBitcoinNetwork: (network: BitcoinNetwork) => void;
+  setAppNetwork: (network: AppNetwork) => void;
 };

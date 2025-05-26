@@ -38,6 +38,7 @@ import {
 } from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Stx from "@/svg/stx.svg";
+import { useUnifiedWallet } from "@/contexts/UnifiedWalletProvider";
 
 
 const ABlurView = Animated.createAnimatedComponent(BlurView);
@@ -222,15 +223,28 @@ function GloryModal({
   );
 }
 
-export function GlurryList({ setShow, solanaWalletAddress, bitcoinAddress, stacksAddress }: { setShow: (show: boolean) => void, solanaWalletAddress: string, bitcoinAddress: string, stacksAddress: string }) {
-  const [showToast, setShowToast] = React.useState(false);
+// Add a generic address truncation function
+function formatAddress(addr: string | null | undefined): string {
+  if (!addr) return "Unknown";
+  if (addr.length <= 10) return addr;
+  return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
+}
+
+export function GlurryList({ setShow }: { setShow: (show: boolean) => void }) {
+  const { solana, bitcoin, stacks, ethereum, hyperevm, mnemonic } = useUnifiedWallet();
+  const solanaWalletAddress = solana?.publicKey || '';
+  const bitcoinAddress = bitcoin?.address || '';
+  const stacksAddress = stacks?.address || '';
+  const ethereumAddress = ethereum?.address || '';
+  const hyperevmAddress = hyperevm?.address || '';
   const providers = [
     {
       title: "Bitcoin",
       icon: "https://simpleicons.org/icons/bitcoin.svg",
-      color: "#000000",
+      color: "orange",
       selected: false,
       address: bitcoinAddress,
+      format: formatAddress,
     },
     {
       title: "Solana",
@@ -238,6 +252,7 @@ export function GlurryList({ setShow, solanaWalletAddress, bitcoinAddress, stack
       color: "#4285F4",
       selected: false,
       address: solanaWalletAddress,
+      format: formatAddress,
     },
     {
       title: "Stacks",
@@ -245,12 +260,29 @@ export function GlurryList({ setShow, solanaWalletAddress, bitcoinAddress, stack
       color: "#4285F4",
       selected: false,
       address: stacksAddress,
+      format: formatAddress,
+    },
+    {
+      title: "Ethereum",
+      icon: "https://simpleicons.org/icons/ethereum.svg",
+      color: "#627eea",
+      selected: false,
+      address: ethereumAddress,
+      format: formatAddress,
+    },
+    {
+      title: "HyperEVM",
+      icon: "https://avatars.githubusercontent.com/u/129421375?s=200&v=4",
+      // color: "#ffb300",
+      selected: false,
+      address: hyperevmAddress,
+      format: formatAddress,
     },
   ];
 
-  const handleCopyAndToast = (address: string) => {
-    handleCopy(address);
-    notifySuccess("Copied to clipboard"); 
+  const handleCopyAndToast = (value: string, label: string) => {
+    handleCopy(value);
+    notifySuccess(`${label} copied to clipboard`); 
   };
 
   return (
@@ -262,7 +294,7 @@ export function GlurryList({ setShow, solanaWalletAddress, bitcoinAddress, stack
       >
         <Pressable style={{ flex: 1 }} onPress={() => setShow(false)}>
           <Form.List
-            navigationTitle="Components"
+            navigationTitle="Wallets"
             style={{
               transform: [{ scaleY: -1 }],
               backgroundColor: "transparent",
@@ -278,7 +310,7 @@ export function GlurryList({ setShow, solanaWalletAddress, bitcoinAddress, stack
                   sensory
                   key={provider.title}
                   onPress={() => {
-                    handleCopyAndToast(provider.address);
+                    handleCopyAndToast(provider.address, provider.title);
                     setShow(false);
                   }}
                 >
@@ -322,9 +354,7 @@ export function GlurryList({ setShow, solanaWalletAddress, bitcoinAddress, stack
                       <Form.Text 
                         style={[Form.FormFont.default, { fontSize: 12, color: "#888" }]}
                       >
-                        {provider.title === "Solana"
-                          ? formatSolanaAddress(new PublicKey(provider.address))
-                          : formatBitcoinAddress(provider.address)}
+                        {provider.format(provider.address)}
                       </Form.Text>
                     </View>
                     <View style={{ flex: 1 }} />

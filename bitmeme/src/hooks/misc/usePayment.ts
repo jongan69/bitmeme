@@ -1,4 +1,4 @@
-import { useSolanaWallet } from "@/contexts/SolanaWalletProvider";
+import { useUnifiedWallet } from "@/contexts/UnifiedWalletProvider";
 import {
     SOL_DECIMALS,
     SOL_MINT,
@@ -34,7 +34,11 @@ export const fetchJupiterSwap = async (mint: string) => {
 
 
 export const useSolanaPayment = () => {
-    const { connection, publicKey, sendTransaction, network } = useSolanaWallet();
+    const { solana } = useUnifiedWallet();
+    const connection = solana.connection;
+    const publicKey = new PublicKey(solana.publicKey);
+    const sendTransaction = solana.sendTransaction;
+    const network = solana.network;
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 

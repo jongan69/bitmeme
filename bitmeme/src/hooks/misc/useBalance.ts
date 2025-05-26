@@ -4,8 +4,8 @@ import { Connection, PublicKey } from "@solana/web3.js";
 import { BigNumber } from "bignumber.js";
 import useSWR from "swr";
 
-import { useSolanaWallet } from "@/contexts/SolanaWalletProvider";
 import { useZplClient } from "@/contexts/ZplClientProvider";
+import { useUnifiedWallet } from "@/contexts/UnifiedWalletProvider";
 
 const balanceFetcher = async (
   publickey: PublicKey,
@@ -23,7 +23,8 @@ const balanceFetcher = async (
 };
 
 const useBalance = (solanaPubkey: PublicKey | null) => {
-  const { connection } = useSolanaWallet();
+  const { solana } = useUnifiedWallet();
+  const connection = solana.connection;
   const zplClient = useZplClient();
   const { data, isLoading, mutate } = useSWR<BigNumber>(
     solanaPubkey && connection && zplClient?.assetMint

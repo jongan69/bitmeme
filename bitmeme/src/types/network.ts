@@ -1,10 +1,19 @@
+import { BitcoinNetwork, EthereumNetwork, HyperevmNetwork, SolanaNetwork, StacksNetwork } from "./store";
+
 export enum Chain {
   Solana = "Solana",
   Bitcoin = "Bitcoin",
   Stacks = "Stacks",
+  Ethereum = "Ethereum",
+  Hyperevm = "Hyperevm",
 }
 
 export interface NetworkConfig {
+  bitcoinNetwork: BitcoinNetwork;
+  solanaNetwork: SolanaNetwork;
+  stacksNetwork: StacksNetwork;
+  ethereumNetwork: EthereumNetwork;
+  hyperevmNetwork: HyperevmNetwork;
   binanceUrl: string;
   aresUrl: string;
   aegleUrl: string;

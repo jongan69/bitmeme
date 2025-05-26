@@ -1,11 +1,20 @@
 import { NetworkConfig, NetworkConfigMap } from "@/types/network";
-import { BitcoinNetwork, SolanaNetwork } from "@/types/store";
+import { AppNetwork, BitcoinNetwork, EthereumNetwork, HyperevmNetwork, SolanaNetwork, StacksNetwork } from "@/types/store";
 
-const bitcoinNetwork = process.env.EXPO_PUBLIC_BITCOIN_NETWORK === "testnet" ? BitcoinNetwork.Testnet : BitcoinNetwork.Mainnet;
-const solanaNetwork = process.env.EXPO_PUBLIC_SOLANA_NETWORK === "devnet" ? SolanaNetwork.Devnet : SolanaNetwork.Mainnet;
+const appNetwork = process.env.EXPO_PUBLIC_APP_NETWORK === AppNetwork.Devnet ? AppNetwork.Devnet : AppNetwork.Mainnet;
+const bitcoinNetwork = appNetwork === AppNetwork.Devnet ? BitcoinNetwork.Testnet : BitcoinNetwork.Mainnet;
+const solanaNetwork = appNetwork === AppNetwork.Devnet ? SolanaNetwork.Devnet : SolanaNetwork.Mainnet;
+const stacksNetwork = appNetwork === AppNetwork.Devnet ? StacksNetwork.Testnet : StacksNetwork.Mainnet;
+const ethereumNetwork = appNetwork === AppNetwork.Devnet ? EthereumNetwork.Devnet : EthereumNetwork.Mainnet;  
+const hyperevmNetwork = appNetwork === AppNetwork.Devnet ? HyperevmNetwork.Devnet : HyperevmNetwork.Mainnet;
 
 const NETWORK_CONFIG_MAP: NetworkConfigMap = {
-  [`${bitcoinNetwork}-${solanaNetwork}`]: {
+  [`${appNetwork}`]: {
+    bitcoinNetwork,
+    solanaNetwork,
+    stacksNetwork,
+    ethereumNetwork,
+    hyperevmNetwork,
     binanceUrl: "https://www.binance.com/api",
     aresUrl: process.env.EXPO_PUBLIC_REGTEST_DEVNET_ARES_URL!,
     aegleUrl: process.env.EXPO_PUBLIC_REGTEST_DEVNET_AEGLE_URL!,
@@ -19,10 +28,9 @@ const NETWORK_CONFIG_MAP: NetworkConfigMap = {
 };
 
 export const getNetworkConfig = (
-  solanaNetwork: SolanaNetwork,
-  bitcoinNetwork: BitcoinNetwork
+  appNetwork: AppNetwork,
 ): NetworkConfig => {
-  const key = `${bitcoinNetwork}-${solanaNetwork}`;
+  const key = `${appNetwork}`;
   const config = NETWORK_CONFIG_MAP?.[key];
 
   if (!config) {

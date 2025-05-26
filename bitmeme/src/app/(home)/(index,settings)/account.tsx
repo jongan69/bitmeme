@@ -9,14 +9,15 @@ import { IconSymbol } from "@/components/ui/IconSymbol";
 import * as AC from "@bacons/apple-colors";
 
 // Hooks
-import { useSolanaWallet } from "@/contexts/SolanaWalletProvider";
 import { useUser } from "@clerk/clerk-expo";
-
-
+import { useUnifiedWallet } from "@/contexts/UnifiedWalletProvider";
 
 
 export default function Page() {
-  const { exportPrivateKey } = useSolanaWallet();
+  const { solana, stacks, bitcoin, mnemonic } = useUnifiedWallet();
+  const exportSolanaPrivateKey = solana.exportPrivateKey;
+  const exportStacksPrivateKey = async () => stacks.privateKey;
+  const exportBitcoinPrivateKey = async () => bitcoin.privateKey;
   const { user } = useUser();
 
   // Toast state and handler
@@ -27,12 +28,21 @@ export default function Page() {
     setTimeout(() => setToast(t => ({ ...t, visible: false })), 1500);
   }
 
-  const handleExport = async () => {
+  const handleExport = async (type: 'solana' | 'stacks' | 'bitcoin' | 'mnemonic') => {
     try {
-      const key = await exportPrivateKey();
+      let key;
+      if (type === 'solana') {
+        key = await exportSolanaPrivateKey();
+      } else if (type === 'stacks') {
+        key = await exportStacksPrivateKey();
+      } else if (type === 'bitcoin') {
+        key = await exportBitcoinPrivateKey();
+      } else if (type === 'mnemonic') {
+        key = mnemonic;
+      }
       if (key) {
         Clipboard.setStringAsync(key);
-        showToast('Solana private key copied!', 'success');
+        showToast(`${type} private key copied!`, 'success');
       } else {
         showToast('Failed to export private key', 'error');
       }
@@ -63,10 +73,34 @@ export default function Page() {
             href="/account"
             hint=""
             systemImage={{ name: "key.fill", color: AC.systemPink }}
-            onPress={handleExport}
+            onPress={() => handleExport('solana')}
           >
-            Export Solana Public Key
+            Export Solana Private Key
           </Form.Link>
+          <Form.Link
+            href="/account"
+            hint=""
+            systemImage={{ name: "key.fill", color: AC.systemPink }}
+            onPress={() => handleExport('stacks')}
+          >
+            Export Stacks Private Key
+          </Form.Link>
+          <Form.Link
+            href="/account"
+            hint=""
+            systemImage={{ name: "key.fill", color: AC.systemPink }}
+            onPress={() => handleExport('bitcoin')}
+          >
+            Export Bitcoin Private Key
+          </Form.Link>
+          <Form.Link
+            href="/account"
+            hint=""
+            systemImage={{ name: "key.fill", color: AC.systemPink }}
+            onPress={() => handleExport('mnemonic')}
+          >
+            Export Mnemonic
+          </Form.Link>  
         </Form.Section>
 
         {/* <Form.Section>
