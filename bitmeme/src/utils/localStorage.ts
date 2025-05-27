@@ -20,7 +20,7 @@ export const removeLocalStorage = async (key: string, secure = false): Promise<v
       if (secure) {
         await SecureStore.deleteItemAsync(key);
       } else {
-        localStorage.removeItem(key);
+        await AsyncStorage.removeItem(key);
       }
     }
   } catch (error) {

@@ -20,11 +20,16 @@ import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";
 import { UnifiedWalletProvider } from "@/contexts/UnifiedWalletProvider";
 import { ZplClientProvider } from '@/contexts/ZplClientProvider';
 import ThemeProvider from "@/components/ui/ThemeProvider";
+// import { StripeProvider } from '@stripe/stripe-react-native';
 
 import { SourceCodePro_400Regular } from "@expo-google-fonts/source-code-pro";
 import { InteractionType } from "@/types/api";
 // import { getExplorerUrl } from "@/utils/explorerUrl";
-const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+
+const network = process.env.EXPO_PUBLIC_APP_NETWORK!;
+const clerkPublishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+// const stripePublishableKey = network === "mainnet" ? process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY! : process.env.EXPO_PUBLIC_STRIPE_TEST_PUBLISHABLE_KEY!;
+
 
 SplashScreen.preventAutoHideAsync();
 
@@ -38,7 +43,7 @@ function SplashFallback() {
   return null;
 }
 
-if (!publishableKey) {
+if (!clerkPublishableKey) {
   throw new Error("EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY is not set");
 }
 const CustomDefaultTheme: Theme = {
@@ -76,8 +81,10 @@ export default function Layout() {
       {/* Load fonts in suspense */}
       <AsyncFont src={SourceCodePro_400Regular} fontFamily="Source Code Pro" />
       <ThemeProvider>
-        <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+        <ClerkProvider publishableKey={clerkPublishableKey} tokenCache={tokenCache}>
           <ClerkLoaded>
+            {/* <StripeProvider publishableKey={stripePublishableKey}> */}
+
             <RNThemeProvider
               value={colorScheme === "dark"
                 ? CustomDarkTheme
@@ -172,6 +179,7 @@ export default function Layout() {
                 </UnifiedWalletProvider>
               </GestureHandlerRootView>
             </RNThemeProvider>
+            {/* </StripeProvider> */}
           </ClerkLoaded>
         </ClerkProvider>
       </ThemeProvider>

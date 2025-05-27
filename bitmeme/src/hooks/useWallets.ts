@@ -4,7 +4,7 @@ import { notifyError, notifySuccess } from "@/utils/notification";
 import { useEffect, useState } from "react";
 
 export function useWalletOnboarding(onReady?: () => void) {
-    const { solana, bitcoin, stacks } = useUnifiedWallet();
+    const { solana, bitcoin, stacks, ethereum } = useUnifiedWallet();
     const [loading] = useState(false); // Unified provider is always ready
     const [error] = useState<Error | null>(null);
 
@@ -38,5 +38,6 @@ export function useWalletOnboarding(onReady?: () => void) {
         solanaAddress: solana?.publicKey,
         bitcoinAddress: bitcoin?.address,
         stacksAddress: stacks?.address,
+        ethereumAddress: ethereum?.address,
     };
 }

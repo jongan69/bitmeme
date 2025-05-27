@@ -132,8 +132,8 @@ export const convertBitcoinNetwork = (bitcoinNetwork: BitcoinNetwork) => {
     return bitcoin.networks.regtest;
   if (bitcoinNetwork === BitcoinNetwork.Testnet)
     return bitcoin.networks.testnet;
-  // if (bitcoinNetwork === BitcoinNetwork.Mainnet)
-  //   return bitcoin.networks.mainnet;
+  if (bitcoinNetwork === BitcoinNetwork.Mainnet)
+    return bitcoin.networks.bitcoin;
   throw new Error("Invalid network type");
 };
 

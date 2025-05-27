@@ -102,6 +102,17 @@ export default function Layout({ segment }: { segment: string }) {
           ),
         }}
       />
+      <Stack.Screen
+        name="onramp"
+        modal
+        options={{
+          headerRight: () => (
+            <Form.Link headerRight bold href="/(home)/(settings)/settings" dismissTo>
+              Done
+            </Form.Link>
+          ),
+        }}
+      />
     </Stack>
   );
 }

@@ -294,6 +294,7 @@ export default function Page() {
             >
               View your Wallets
             </Form.Text>
+            <Form.Link href="/onramp">Buy Crypto</Form.Link>
             <Form.Link href="/icon">Change App Icon</Form.Link>
             <Form.Link href="/_debug">Debug menu</Form.Link>
             <Form.Link href="/privacy">Privacy Policy</Form.Link>
@@ -422,6 +423,7 @@ export default function Page() {
               onPress={handleReset}
             />
           </Form.Section>
+
         </Form.List>
       </View>
     </KeyboardAvoidingView>

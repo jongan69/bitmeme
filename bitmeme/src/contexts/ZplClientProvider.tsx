@@ -36,7 +36,7 @@ export const ZplClientProvider: React.FC<{ children: React.ReactNode }> = ({
   const { solana } = useUnifiedWallet();
   const connection = solana.connection;
   const publicKey = new PublicKey(solana.publicKey);
-  const signTransaction = solana.signTransaction;
+  // const signTransaction = solana.signTransaction;
 
   // Add state for the fetched values
   const [programIds, setProgramIds] = useState<{ twoWayPegProgramId?: string; liquidityManagementProgramId?: string; assetMint?: string }>({});
