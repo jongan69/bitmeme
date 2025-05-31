@@ -1,6 +1,8 @@
 # BitMeme – AI-Powered Meme Generator with Crypto Tipping
 
 **Submission for Bitcoin 2025 Official Hackathon**
+
+
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/jongan69/bitmeme?utm_source=oss&utm_medium=github&utm_campaign=jongan69%2Fbitmeme&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
 <a href="https://testflight.apple.com/join/FhzSNKER">
